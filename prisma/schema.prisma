@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   // NOTE: When using postgresql, mysql or sqlserver, uncomment the @db.Text annotations in model Account below
   // Further reading:
   // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
@@ -27,12 +27,12 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? // @db.Text
-  access_token      String? // @db.Text
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? // @db.Text
+  id_token          String? @db.Text
   session_state     String?
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -48,13 +48,39 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
+  id                 String    @id @default(cuid())
+  name               String?
+  displayName        String    @unique
+  email              String?   @unique
+  emailVerified      DateTime?
+  image              String?
+  accounts           Account[]
+  sessions           Session[]
+  ownedProjects      Project[] @relation("Owned")
+  accessibleProjects Project[] @relation("Accessible")
+  invitedProjects    Project[] @relation("Invited")
+}
+
+model Document {
+  id        String   @id @unique @default(cuid())
+  createdAt DateTime @default(now())
+  content   String
+  slug      String   @unique @default(cuid())
+  Project   Project? @relation(fields: [projectId], references: [id])
+  projectId String?
+}
+
+model Project {
+  id        String     @id @unique @default(cuid())
+  name      String
+  revisions Document[]
+  owner     User       @relation("Owned", fields: [userId], references: [id])
+  editors   User[]     @relation("Accessible")
+  viewers   User[]     @relation("Invited")
+  public    Boolean    @default(false)
+  slug      String     @unique @default(cuid())
+  viewOnly  Boolean    @default(true)
+  userId    String
 }
 
 model VerificationToken {

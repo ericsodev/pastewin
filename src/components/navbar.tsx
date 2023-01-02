@@ -1,0 +1,57 @@
+import { IoMdMoon } from 'react-icons/io';
+import { HiSun } from 'react-icons/hi';
+import Link from 'next/link';
+import { signIn, signOut, useSession } from 'next-auth/react';
+import SettingsMenu from './settingsMenu';
+
+export default function Navbar(): JSX.Element {
+    const { data: session, status } = useSession();
+
+    return (
+        <div
+            className={
+                'flex w-full items-center justify-center gap-5 bg-gradient-to-b from-slate-400/40 to-transparent px-5 pt-3.5 pb-8 backdrop-blur-xl dark:from-slate-900/70 dark:to-transparent'
+            }
+        >
+            <Link
+                href="/"
+                className={
+                    'mr-auto h-fit text-xl font-bold text-slate-700/90 transition-colors hover:text-slate-900 dark:text-indigo-300 dark:hover:text-indigo-300/80 dark:focus:text-indigo-200'
+                }
+            >
+                pastewin
+            </Link>
+            <div className="flex flex-row gap-3">
+                <Link
+                    className="border-b-2 border-solid border-b-transparent px-3.5 py-2 font-semibold text-slate-700 transition-all hover:border-slate-300 hover:border-b-slate-400 focus:border-slate-200 focus:border-b-slate-700 dark:text-slate-100"
+                    href="/explore"
+                >
+                    explore
+                </Link>
+                <Link
+                    className="border-b-2 border-solid border-b-transparent px-3.5 py-2 font-semibold text-slate-700 transition-all hover:border-slate-300 hover:border-b-slate-400 focus:border-slate-200 focus:border-b-slate-700 dark:text-slate-100"
+                    href="/createSnippet"
+                >
+                    create
+                </Link>
+                {status === 'authenticated' ? (
+                    <button
+                        onClick={() => signOut()}
+                        className="border-b-2 border-solid  border-b-transparent px-3.5 py-2 font-semibold text-slate-700 transition-all hover:border-slate-300 hover:border-b-slate-400 focus:border-slate-200 focus:border-b-slate-700 dark:text-slate-100"
+                    >
+                        sign out
+                    </button>
+                ) : (
+                    <button
+                        onClick={() => signIn()}
+                        className="border-b-2 border-solid border-b-transparent px-3.5 py-2 font-semibold text-slate-700 transition-all hover:border-slate-300 hover:border-b-slate-400 focus:border-slate-200 focus:border-b-slate-700 dark:text-slate-100"
+                    >
+                        sign in
+                    </button>
+                )}
+            </div>
+            <span className="ml-auto"></span>
+            <SettingsMenu></SettingsMenu>
+        </div>
+    );
+}
