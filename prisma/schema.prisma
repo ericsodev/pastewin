@@ -48,17 +48,18 @@ model Session {
 }
 
 model User {
-  id                 String    @id @default(cuid())
-  name               String?
-  displayName        String    @unique
-  email              String?   @unique
-  emailVerified      DateTime?
-  image              String?
-  accounts           Account[]
-  sessions           Session[]
-  ownedProjects      Project[] @relation("Owned")
-  accessibleProjects Project[] @relation("Accessible")
-  invitedProjects    Project[] @relation("Invited")
+  id               String       @id @default(cuid())
+  name             String?
+  displayName      String       @unique
+  email            String?      @unique
+  emailVerified    DateTime?
+  image            String?
+  accounts         Account[]
+  sessions         Session[]
+  ownedProjects    Project[]    @relation("Owner")
+  editableProjects Project[]    @relation("Editor")
+  viewableProjects Project[]    @relation("Viewer")
+  Invitation       Invitation[]
 }
 
 model Document {
@@ -71,16 +72,27 @@ model Document {
 }
 
 model Project {
-  id        String     @id @unique @default(cuid())
-  name      String
-  revisions Document[]
-  owner     User       @relation("Owned", fields: [userId], references: [id])
-  editors   User[]     @relation("Accessible")
-  viewers   User[]     @relation("Invited")
-  public    Boolean    @default(false)
-  slug      String     @unique @default(cuid())
-  viewOnly  Boolean    @default(true)
+  id           String       @id @unique @default(cuid())
+  name         String
+  revisions    Document[]
+  owner        User         @relation("Owner", fields: [userId], references: [id])
+  editors      User[]       @relation("Editor")
+  viewers      User[]       @relation("Viewer")
+  public       Boolean      @default(false)
+  slug         String       @unique @default(cuid())
+  viewOnly     Boolean      @default(true)
+  userId       String
+  inivitations Invitation[]
+}
+
+model Invitation {
+  project   Project     @relation(fields: [projectId], references: [id])
+  projectId String
+  user      User        @relation(fields: [userId], references: [id])
   userId    String
+  role      ProjectRole
+
+  @@unique([projectId, userId])
 }
 
 model VerificationToken {
@@ -89,4 +101,10 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+enum ProjectRole {
+  VIEWER
+  EDITOR
+  OWNER
 }
