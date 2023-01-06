@@ -14,12 +14,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Example {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
 // Necessary for Next auth
 model Account {
   id                String  @id @default(cuid())
@@ -50,7 +44,7 @@ model Session {
 model User {
   id               String       @id @default(cuid())
   name             String?
-  displayName      String       @unique
+  displayName      String?      @unique
   email            String?      @unique
   emailVerified    DateTime?
   image            String?
@@ -59,30 +53,34 @@ model User {
   ownedProjects    Project[]    @relation("Owner")
   editableProjects Project[]    @relation("Editor")
   viewableProjects Project[]    @relation("Viewer")
-  Invitation       Invitation[]
+  invitations      Invitation[]
 }
 
 model Document {
-  id        String   @id @unique @default(cuid())
-  createdAt DateTime @default(now())
-  content   String
-  slug      String   @unique @default(cuid())
-  Project   Project? @relation(fields: [projectId], references: [id])
-  projectId String?
+  id          String   @id @unique @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  content     String
+  slug        String   @unique @default(cuid())
+  project     Project  @relation("Revisions", fields: [projectId], references: [id])
+  projectHead Project? @relation("Published")
+  projectId   String
 }
 
 model Project {
-  id           String       @id @unique @default(cuid())
-  name         String
-  revisions    Document[]
-  owner        User         @relation("Owner", fields: [userId], references: [id])
-  editors      User[]       @relation("Editor")
-  viewers      User[]       @relation("Viewer")
-  public       Boolean      @default(false)
-  slug         String       @unique @default(cuid())
-  viewOnly     Boolean      @default(true)
-  userId       String
-  inivitations Invitation[]
+  id                  String       @id @unique @default(cuid())
+  name                String
+  revisions           Document[]   @relation("Revisions")
+  publishedDocument   Document     @relation("Published", fields: [publishedDocumentId], references: [id])
+  owner               User         @relation("Owner", fields: [userId], references: [id])
+  editors             User[]       @relation("Editor")
+  viewers             User[]       @relation("Viewer")
+  invitations         Invitation[]
+  public              Boolean      @default(false)
+  slug                String       @unique @default(cuid())
+  viewOnly            Boolean      @default(true)
+  userId              String
+  publishedDocumentId String       @unique
 }
 
 model Invitation {
