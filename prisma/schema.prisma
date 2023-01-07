@@ -57,30 +57,28 @@ model User {
 }
 
 model Document {
-  id          String   @id @unique @default(cuid())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  content     String
-  slug        String   @unique @default(cuid())
-  project     Project  @relation("Revisions", fields: [projectId], references: [id])
-  projectHead Project? @relation("Published")
-  projectId   String
+  id        String   @id @unique @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  content   String
+  slug      String   @unique @default(cuid())
+  project   Project  @relation(fields: [projectId], references: [id])
+  projectId String
+  published Boolean  @default(false)
 }
 
 model Project {
-  id                  String       @id @unique @default(cuid())
-  name                String
-  revisions           Document[]   @relation("Revisions")
-  publishedDocument   Document     @relation("Published", fields: [publishedDocumentId], references: [id])
-  owner               User         @relation("Owner", fields: [userId], references: [id])
-  editors             User[]       @relation("Editor")
-  viewers             User[]       @relation("Viewer")
-  invitations         Invitation[]
-  public              Boolean      @default(false)
-  slug                String       @unique @default(cuid())
-  viewOnly            Boolean      @default(true)
-  userId              String
-  publishedDocumentId String       @unique
+  id          String       @id @unique @default(cuid())
+  name        String
+  revisions   Document[]
+  owner       User         @relation("Owner", fields: [userId], references: [id])
+  editors     User[]       @relation("Editor")
+  viewers     User[]       @relation("Viewer")
+  invitations Invitation[]
+  public      Boolean      @default(false)
+  slug        String       @unique @default(cuid())
+  viewOnly    Boolean      @default(true)
+  userId      String
 }
 
 model Invitation {
