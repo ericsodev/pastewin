@@ -2,14 +2,15 @@ import { Menu } from "@headlessui/react";
 import { MdAccountCircle } from "react-icons/md";
 import { HiSun } from "react-icons/hi";
 import { IoMdMoon } from "react-icons/io";
-import { useColorMode } from "../contexts/colorModeContext";
+import { IoMdSettings } from "react-icons/io";
+import { useColorMode } from "../../contexts/colorModeContext";
 
 export default function SettingsMenu(): JSX.Element {
   const { color, toggleColor } = useColorMode();
   return (
     <Menu as="div" className="relative">
-      <Menu.Button className="rounded-md border-solid bg-slate-50/80 px-3.5 py-2 font-medium text-slate-700 backdrop-blur-2xl transition-all hover:bg-slate-50/60 focus:bg-slate-50/90 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-800/80 dark:focus:bg-slate-700/80">
-        settings
+      <Menu.Button className="rounded-md border-solid bg-slate-50/80 p-1.5 text-xl font-medium text-slate-500 backdrop-blur-2xl transition-all hover:bg-slate-50/60 focus:bg-slate-50/90 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-800/80 dark:focus:bg-slate-700/80">
+        <IoMdSettings></IoMdSettings>
       </Menu.Button>
       <Menu.Items className="absolute right-0 min-w-fit origin-top-right divide-y-2 divide-gray-300/70 rounded-md bg-slate-50/60 px-1 py-0.5 text-sm text-slate-600 shadow-md backdrop-blur-2xl">
         <div className="px-0.5 py-0.5">
