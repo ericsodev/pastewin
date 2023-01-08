@@ -3,29 +3,37 @@ import { router, publicProcedure, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 
 export const userRouter = router({
-  getProfile: publicProcedure.input(z.string()).query(async ({ ctx, input: displayName }) => {
-    const user = await ctx.prisma.user.findUnique({
-      where: {
-        displayName: displayName,
-      },
-      select: {
-        displayName: true,
-        image: true,
-        ownedProjects: {
-          where: {
-            public: { equals: true },
+  getProfile: publicProcedure
+    .input(
+      z
+        .object({ displayName: z.string(), userId: z.string() })
+        .partial()
+        .refine((d) => !!d.displayName || !!d.userId)
+    )
+    .query(async ({ ctx, input }) => {
+      const user = await ctx.prisma.user.findUnique({
+        where: {
+          displayName: input.displayName,
+          id: input.userId,
+        },
+        select: {
+          displayName: true,
+          image: true,
+          ownedProjects: {
+            where: {
+              public: { equals: true },
+            },
+          },
+          editableProjects: {
+            where: {
+              public: { equals: true },
+            },
           },
         },
-        editableProjects: {
-          where: {
-            public: { equals: true },
-          },
-        },
-      },
-    });
-    if (user === null) throw new TRPCError({ code: "NOT_FOUND" });
-    return user;
-  }),
+      });
+      if (user === null) throw new TRPCError({ code: "NOT_FOUND" });
+      return user;
+    }),
   getViewableProjects: protectedProcedure.query(async ({ ctx }) => {
     const user = await ctx.prisma.user.findUnique({
       where: { id: ctx.session.user.id },
@@ -64,6 +72,53 @@ export const userRouter = router({
     if (!user) throw new TRPCError({ code: "NOT_FOUND" });
 
     return user.ownedProjects;
+  }),
+  getAllProjects: protectedProcedure.query(async ({ ctx }) => {
+    const user = await ctx.prisma.user.findUnique({
+      where: {
+        id: ctx.session.user.id,
+      },
+      select: {
+        ownedProjects: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            owner: {
+              select: {
+                displayName: true,
+              },
+            },
+          },
+        },
+        editableProjects: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            owner: {
+              select: {
+                displayName: true,
+              },
+            },
+          },
+        },
+        viewableProjects: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            owner: {
+              select: {
+                displayName: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    if (!user) throw new TRPCError({ code: "UNAUTHORIZED" });
+    return user;
   }),
   getInvites: protectedProcedure
     .input(z.object({ userId: z.string() }))
@@ -190,5 +245,15 @@ export const userRouter = router({
       if (invite === null) throw new TRPCError({ code: "NOT_FOUND" });
 
       return invite;
+    }),
+  nameTaken: protectedProcedure
+    .input(z.string().min(1).max(20))
+    .query(async ({ ctx, input: name }) => {
+      const user = await ctx.prisma.user.findUnique({
+        where: {
+          displayName: name,
+        },
+      });
+      return !!user;
     }),
 });

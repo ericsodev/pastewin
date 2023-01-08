@@ -5,13 +5,15 @@ import { Loading } from "../../components/loading";
 import { z } from "zod";
 import { Formik, Form, Field } from "formik";
 import { toFormikValidationSchema } from "zod-formik-adapter";
+import { useRouter } from "next/router";
 
 interface FormSchemaType {
   name: string;
 }
-const schema = z.object({ name: z.string().min(1).max(20) });
+const schema = z.object({ name: z.string().max(20) });
 
 const NewUserPage: NextPage = (req, res) => {
+  const router = useRouter();
   const { data: session, status } = useSession();
   const { user } = trpc.useContext();
   const nameMutation = trpc.user.changeName.useMutation();
@@ -20,14 +22,14 @@ const NewUserPage: NextPage = (req, res) => {
 
   const onSubmit = async (data: FormSchemaType) => {
     await nameMutation.mutateAsync(data.name);
+    router.push("/");
   };
   const validate = async (values: FormSchemaType) => {
     try {
+      // TODO: throttle
       const taken = await user.nameTaken.fetch(values.name);
       if (taken) return { name: `${values.name} is already in use` };
-    } catch (e) {
-      return { name: `please enter a name less than 20 characters long` };
-    }
+    } catch (e) {}
   };
   return (
     <div className="flex h-full w-full flex-col items-center gap-5">
@@ -48,6 +50,7 @@ const NewUserPage: NextPage = (req, res) => {
                 className="w-72 rounded-md bg-slate-100/80 px-3 py-1.5 text-slate-600 focus:outline-none"
                 name="name"
               ></Field>
+              <label>{errors.name}</label>
             </div>
 
             <button

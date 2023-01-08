@@ -16,34 +16,46 @@ export const projectRouter = router({
         where: {
           AND: [
             {
-              OR: {
-                id: input.projectId,
-                slug: input.projectSlug,
-              },
+              OR: [
+                // {
+                //   id: input.projectId,
+                // },
+                {
+                  slug: input.projectSlug,
+                },
+              ],
             },
             {
-              OR: {
-                public: true,
-                viewers: {
-                  some: {
+              OR: [
+                {
+                  public: true,
+                },
+                {
+                  viewers: {
+                    some: {
+                      id: {
+                        equals: ctx.session?.user?.id,
+                      },
+                    },
+                  },
+                },
+                {
+                  editors: {
+                    some: {
+                      id: {
+                        equals: ctx.session?.user?.id,
+                      },
+                    },
+                  },
+                },
+                {
+                  owner: {
                     id: {
                       equals: ctx.session?.user?.id,
                     },
                   },
                 },
-                editors: {
-                  some: {
-                    id: {
-                      equals: ctx.session?.user?.id,
-                    },
-                  },
-                },
-                owner: {
-                  id: {
-                    equals: ctx.session?.user?.id,
-                  },
-                },
-              },
+              ],
             },
           ],
         },
@@ -51,6 +63,7 @@ export const projectRouter = router({
           id: true,
           slug: true,
           public: true,
+          name: true,
           revisions: {
             take: 6,
             orderBy: {
@@ -58,19 +71,24 @@ export const projectRouter = router({
             },
             select: {
               id: true,
+              name: true,
               slug: true,
+              createdAt: true,
+              published: true,
             },
           },
           owner: {
             select: {
               id: true,
               displayName: true,
+              image: true,
             },
           },
           editors: {
             select: {
               id: true,
               displayName: true,
+              image: true,
             },
             orderBy: {
               displayName: "asc",
@@ -80,6 +98,7 @@ export const projectRouter = router({
             select: {
               id: true,
               displayName: true,
+              image: true,
             },
             orderBy: {
               displayName: "asc",
@@ -113,6 +132,12 @@ export const projectRouter = router({
           owner: {
             connect: {
               id: ctx.session.user.id,
+            },
+          },
+          revisions: {
+            create: {
+              content: "",
+              published: true,
             },
           },
           name: input.name,

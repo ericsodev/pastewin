@@ -16,7 +16,7 @@ const ViewProjectPage: NextPage = (req, res) => {
           <Link href={`/project/${v.slug}`} key={v.id}>
             <div
               tabIndex={0}
-              className=" cursor-pointer rounded-md border-[2px] border-white/50 bg-gradient-to-br from-white/40 to-white/10 px-8 py-6 hover:border-white/30 hover:from-white/30 dark:border-gray-800 dark:from-gray-900 dark:to-gray-800/50 dark:hover:border-violet-500/40"
+              className="cursor-pointer rounded-md border-[2px] border-white/50 bg-gradient-to-br from-white/40 to-white/10 px-8 py-6 hover:border-white/30 hover:from-white/30 dark:border-gray-800 dark:from-gray-900 dark:to-gray-800/50 dark:hover:border-violet-500/40"
             >
               <h2 className="mb-5 text-xl font-semibold text-slate-700 dark:text-slate-300">
                 {v.name}

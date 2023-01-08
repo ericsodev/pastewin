@@ -58,6 +58,7 @@ model User {
 
 model Document {
   id        String   @id @unique @default(cuid())
+  name      String   @default("Document")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   content   String

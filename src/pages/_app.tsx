@@ -5,6 +5,7 @@ import { SessionProvider } from "next-auth/react";
 import { trpc } from "../utils/trpc";
 
 import "../styles/globals.css";
+import "../styles/loading.css";
 import Layout from "../components/layout";
 
 import "@fontsource/inter/300.css";
