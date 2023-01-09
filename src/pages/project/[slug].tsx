@@ -5,6 +5,7 @@ import { Loading } from "../../components/loading";
 import { Error } from "../../components/error";
 import Link from "next/link";
 import dayjs from "dayjs";
+import Head from "next/head";
 
 const ProjectPage: NextPage = () => {
   const router = useRouter();
@@ -23,17 +24,20 @@ const ProjectPage: NextPage = () => {
   if (isLoading) return <Loading></Loading>;
   return (
     <div className="flex flex-col gap-8 p-16 xl:px-36 2xl:px-48">
-      <div>
-        <h1 className="text-4xl font-semibold text-slate-800 dark:text-slate-100">
+      <Head>
+        <title>{project.name} | PasteWin</title>
+      </Head>
+      <div className="flex h-max flex-row items-end gap-2">
+        <h1 className="max-w-[24ch] truncate text-4xl font-semibold text-slate-800 dark:text-slate-100">
           {project.name}{" "}
-          <span className="text-2xl font-normal text-slate-400">
-            {" "}
-            by{" "}
-            <Link href={`/account/public/${project.owner.displayName}`} className="font-medium">
-              {project.owner.displayName}
-            </Link>
-          </span>
         </h1>
+        <span className="text-2xl font-normal text-slate-400">
+          {" "}
+          by{" "}
+          <Link href={`/account/public/${project.owner.displayName}`} className="font-medium">
+            {project.owner.displayName}
+          </Link>
+        </span>
       </div>
       <div>
         <h2 className="mb-4 text-2xl font-medium text-slate-700 dark:text-slate-300">Revisions</h2>
