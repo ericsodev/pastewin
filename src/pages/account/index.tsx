@@ -1,16 +1,13 @@
-import { NextPage } from "next";
+import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import { trpc } from "../../utils/trpc";
 import { Error } from "../../components/error";
 import { Loading } from "../../components/loading";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
+import { useEffect } from "react";
 
 const AccountPage: NextPage = (req, res) => {
-  const {
-    data: session,
-    isLoading: sessionLoading,
-    isError: sessionError,
-  } = trpc.auth.getSession.useQuery();
+  const { data: session, status: sessionStatus } = useSession();
   const {
     data: account,
     isLoading: accountLoading,
@@ -22,11 +19,13 @@ const AccountPage: NextPage = (req, res) => {
       enabled: !!session,
     }
   );
+  useEffect(() => {
+    if (sessionStatus === "unauthenticated") signIn();
+  }, [sessionStatus]);
 
-  if (sessionError || accountError) return <Error></Error>;
-  if (sessionLoading || accountLoading) return <Loading></Loading>;
-  if (!session) signIn();
-  return <div>{account.image}</div>;
+  if (accountError) return <Error></Error>;
+  if (accountLoading || sessionStatus === "loading") return <Loading></Loading>;
+  return <div>{account.ownedProjects.map((x) => x.name)}</div>;
 };
 
 export default AccountPage;

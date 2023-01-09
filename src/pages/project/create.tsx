@@ -1,9 +1,12 @@
 import z from "zod";
-import { NextPage } from "next";
+import type { NextPage } from "next";
 import { Formik, Field, Form } from "formik";
 import { trpc } from "../../utils/trpc";
 import { toFormikValidationSchema } from "zod-formik-adapter";
 import { useRouter } from "next/router";
+import { Loading } from "../../components/loading";
+import { Error } from "../../components/error";
+import { signIn, useSession } from "next-auth/react";
 
 interface FormSchemaType {
   name: string;
@@ -13,12 +16,17 @@ interface FormSchemaType {
 const schema = z.object({ name: z.string().max(35), public: z.boolean().default(true) });
 
 const CreateProjectPage: NextPage = (req, res) => {
+  const { status } = useSession();
   const router = useRouter();
   const projectMutation = trpc.project.create.useMutation();
   const handleSubmit = async (data: FormSchemaType) => {
     const proj = await projectMutation.mutateAsync({ name: data.name, public: data.public });
     router.push(`/project/${proj.slug}`);
   };
+
+  if (status === "unauthenticated") signIn();
+  if (projectMutation.isLoading) return <Loading></Loading>;
+  if (projectMutation.isError) return <Error></Error>;
 
   return (
     <div className="flex h-full flex-col items-center justify-center">

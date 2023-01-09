@@ -1,6 +1,7 @@
 import { Menu } from "@headlessui/react";
 import { signIn, signOut } from "next-auth/react";
 import Image from "next/image";
+import Link from "next/link";
 import { BiLogOutCircle } from "react-icons/bi";
 import { MdAccountCircle } from "react-icons/md";
 import { useColorMode } from "../../contexts/colorModeContext";
@@ -22,9 +23,9 @@ export default function AccountMenu(): JSX.Element {
     <Menu as="div" className="relative">
       <Menu.Button className="rounded-md border-solid border-white">
         <Image
-          className="h-10 w-10 self-center rounded-full border-2 border-solid border-white dark:border-gray-500"
-          width="50"
-          height="50"
+          className="h-10 w-10 self-center rounded-full border-2 border-solid border-purple-50 dark:border-purple-200"
+          width="100"
+          height="100"
           src={session.user?.image ?? "/"}
           alt="account image"
         ></Image>
@@ -33,10 +34,13 @@ export default function AccountMenu(): JSX.Element {
         <div className="px-0.5 py-0.5">
           <Menu.Item>
             {({ active }) => (
-              <button className="my-1 inline-flex w-full items-center justify-start gap-1.5 rounded-md p-2 hover:bg-slate-200 hover:bg-opacity-70">
+              <Link
+                href={`/account`}
+                className="my-1 inline-flex w-full items-center justify-start gap-1.5 rounded-md p-2 hover:bg-slate-200 hover:bg-opacity-70"
+              >
                 <MdAccountCircle className="text-lg"></MdAccountCircle>
                 account
-              </button>
+              </Link>
             )}
           </Menu.Item>
         </div>
