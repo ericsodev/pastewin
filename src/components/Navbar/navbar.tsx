@@ -1,9 +1,7 @@
-import { IoMdMoon } from "react-icons/io";
-import { HiSun } from "react-icons/hi";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { signIn, signOut, useSession } from "next-auth/react";
-import SettingsMenu from "./settingsMenu";
 import AccountMenu from "./accountMenu";
+import SettingsMenu from "./settingsMenu";
 
 export default function Navbar(): JSX.Element {
   const { data: session, status } = useSession();
@@ -30,19 +28,21 @@ export default function Navbar(): JSX.Element {
           explore
         </Link>
         {status === "authenticated" && (
-          <Link
-            href="/project/view"
-            className="border-b-2 border-solid border-b-transparent px-3.5 py-2 font-semibold text-slate-700 transition-all hover:border-slate-300 hover:border-b-slate-400 focus:border-slate-200 focus:border-b-slate-700 dark:text-slate-100"
-          >
-            your projects
-          </Link>
+          <>
+            <Link
+              href="/project/view"
+              className="border-b-2 border-solid border-b-transparent px-3.5 py-2 font-semibold text-slate-700 transition-all hover:border-slate-300 hover:border-b-slate-400 focus:border-slate-200 focus:border-b-slate-700 dark:text-slate-100"
+            >
+              your projects
+            </Link>
+            <Link
+              className="border-b-2 border-solid border-b-transparent px-3.5 py-2 font-semibold text-slate-700 transition-all hover:border-slate-300 hover:border-b-slate-400 focus:border-slate-200 focus:border-b-slate-700 dark:text-slate-100"
+              href="/project/create"
+            >
+              create
+            </Link>
+          </>
         )}
-        <Link
-          className="border-b-2 border-solid border-b-transparent px-3.5 py-2 font-semibold text-slate-700 transition-all hover:border-slate-300 hover:border-b-slate-400 focus:border-slate-200 focus:border-b-slate-700 dark:text-slate-100"
-          href="/project/create"
-        >
-          create
-        </Link>
       </div>
       <span className="ml-auto"></span>
       <AccountMenu></AccountMenu>
