@@ -1,7 +1,7 @@
 import z from "zod";
 import { router, publicProcedure, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
-import { isEditAuthorized, isViewAuthorized } from "./projectAuthUtil";
+import { isEditAuthorized, isViewAuthorized, getAuthority } from "./projectAuthUtil";
 
 export const documentRouter = router({
   getDocument: publicProcedure
@@ -20,6 +20,7 @@ export const documentRouter = router({
           },
           select: {
             id: true,
+            name: true,
             slug: true,
             content: true,
             createdAt: true,
@@ -28,6 +29,11 @@ export const documentRouter = router({
                 id: true,
                 slug: true,
                 name: true,
+                owner: {
+                  select: {
+                    displayName: true,
+                  },
+                },
               },
             },
           },
@@ -75,7 +81,7 @@ export const documentRouter = router({
       if (!document || !project) throw new TRPCError({ code: "NOT_FOUND" });
       if (!isViewAuthorized(project, ctx.session?.user?.id))
         throw new TRPCError({ code: "UNAUTHORIZED" });
-      return document;
+      return { ...document, role: getAuthority(project, ctx.session?.user?.id) };
     }),
   document: protectedProcedure
     .input(z.object({ documentId: z.string(), content: z.string() }))

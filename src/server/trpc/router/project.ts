@@ -125,7 +125,7 @@ export const projectRouter = router({
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }),
   create: protectedProcedure
-    .input(z.object({ name: z.string().max(25), public: z.boolean().default(true) }))
+    .input(z.object({ name: z.string().max(35), public: z.boolean().default(true) }))
     .mutation(async ({ ctx, input }) => {
       return await ctx.prisma.project.create({
         data: {
