@@ -10,7 +10,7 @@ import { useRouter } from "next/router";
 interface FormSchemaType {
   name: string;
 }
-const schema = z.object({ name: z.string().max(20) });
+const schema = z.object({ name: z.string().min(1, "required").max(20) });
 
 const NewUserPage: NextPage = (req, res) => {
   const router = useRouter();

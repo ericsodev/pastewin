@@ -13,7 +13,10 @@ interface FormSchemaType {
   public: boolean;
 }
 
-const schema = z.object({ name: z.string().max(35), public: z.boolean().default(true) });
+const schema = z.object({
+  name: z.string().min(1, "required").max(35),
+  public: z.boolean().default(true),
+});
 
 const CreateProjectPage: NextPage = (req, res) => {
   useSession({
