@@ -98,7 +98,6 @@ export const documentRouter = router({
 
       if (!isViewAuthorized(project, ctx.session?.user?.id))
         throw new TRPCError({ code: "UNAUTHORIZED" });
-
       return { ...document, role: getAuthority(project, ctx.session?.user?.id) };
     }),
   document: protectedProcedure
