@@ -1,4 +1,4 @@
-import { NextPage } from "next";
+import type { NextPage } from "next";
 import { trpc } from "../../utils/trpc";
 import { signIn, useSession } from "next-auth/react";
 import { Loading } from "../../components/loading";
@@ -14,11 +14,14 @@ const schema = z.object({ name: z.string().max(20) });
 
 const NewUserPage: NextPage = (req, res) => {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { status } = useSession({
+    required: true,
+    onUnauthenticated() {
+      signIn();
+    },
+  });
   const { user } = trpc.useContext();
   const nameMutation = trpc.user.changeName.useMutation();
-  if (status === "loading") return <Loading></Loading>;
-  if (status === "unauthenticated") signIn();
 
   const onSubmit = async (data: FormSchemaType) => {
     await nameMutation.mutateAsync(data.name);
@@ -31,6 +34,8 @@ const NewUserPage: NextPage = (req, res) => {
       if (taken) return { name: `${values.name} is already in use` };
     } catch (e) {}
   };
+
+  if (status === "loading") return <Loading></Loading>;
   return (
     <div className="flex h-full w-full flex-col items-center gap-5">
       <div className="flex basis-1/4 flex-col justify-center">

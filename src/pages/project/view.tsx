@@ -3,11 +3,18 @@ import { trpc } from "../../utils/trpc";
 import { Loading } from "../../components/loading";
 import { Error } from "../../components/error";
 import Link from "next/link";
+import { signIn, useSession } from "next-auth/react";
 
 const gridSizingClasses =
   "lg:grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] 2xl:grid-cols-[repeat(auto-fill,minmax(18rem,1fr))] 4xl:grid-cols-[repeat(auto-fill,minmax(20rem,1fr))]";
 
 const ViewProjectPage: NextPage = (req, res) => {
+  useSession({
+    required: true,
+    onUnauthenticated() {
+      signIn();
+    },
+  });
   const { data: projects, isLoading, isError } = trpc.user.getAllProjects.useQuery();
 
   if (isError) return <Error></Error>;
