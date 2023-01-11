@@ -88,7 +88,7 @@ const DocumentPage: NextPage = () => {
         )}
         <textarea
           contentEditable={["EDITOR", "OWNER"].includes(document.role) && !document.viewOnly}
-          className={`grow basis-96 rounded-md bg-ch-gray-50 px-6 py-4 outline-none focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500 dark:bg-ch-gray-700 dark:focus:ring-violet-300 ${
+          className={`grow basis-96 resize-none rounded-md bg-ch-gray-50 px-6 py-4 outline-none ring-2 ring-gray-400 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 dark:bg-ch-gray-700 dark:focus:ring-violet-500 ${
             documentMutate.isLoading
               ? "border-emerald-200 bg-ch-gray-200/90 ring-4 ring-emerald-200 dark:bg-ch-gray-800/70"
               : ""
