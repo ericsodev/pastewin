@@ -12,7 +12,7 @@ const AccountPage: NextPage = (req, res) => {
     data: account,
     isLoading: accountLoading,
     isError: accountError,
-  } = trpc.user.getProfile.useQuery(
+  } = trpc.user.getPublicProfile.useQuery(
     { userId: session?.user?.id as string },
     {
       retry: 0,

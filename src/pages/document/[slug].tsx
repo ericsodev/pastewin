@@ -87,7 +87,7 @@ const DocumentPage: NextPage = () => {
           </div>
         )}
         <textarea
-          contentEditable={document.role === "EDITOR" || document.role === "OWNER"}
+          contentEditable={["EDITOR", "OWNER"].includes(document.role) && !document.viewOnly}
           className={`grow basis-96 rounded-md bg-ch-gray-50 px-6 py-4 outline-none focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500 dark:bg-ch-gray-700 dark:focus:ring-violet-300 ${
             documentMutate.isLoading
               ? "border-emerald-200 bg-ch-gray-200/90 ring-4 ring-emerald-200 dark:bg-ch-gray-800/70"
@@ -97,7 +97,7 @@ const DocumentPage: NextPage = () => {
           onChange={(e) => setContent(e.target.value)}
         ></textarea>
 
-        {["EDITOR", "OWNER"].includes(document.role) && (
+        {["EDITOR", "OWNER"].includes(document.role) && !document.viewOnly && (
           <button
             onClick={handleSave}
             className="text-medium self-center rounded-md bg-green-200 px-4 py-1.5 font-medium text-green-800"

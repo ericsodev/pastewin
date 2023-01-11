@@ -38,6 +38,7 @@ export const documentRouter = router({
             slug: true,
             content: true,
             createdAt: true,
+            viewOnly: true,
             project: {
               select: {
                 id: true,
@@ -122,6 +123,7 @@ export const documentRouter = router({
           id: input.documentId,
         },
         select: {
+          viewOnly: true,
           project: {
             select: {
               editors: {
@@ -146,7 +148,8 @@ export const documentRouter = router({
         });
       if (!isEditAuthorized(document.project, ctx.session.user.id))
         throw new TRPCError({ code: "UNAUTHORIZED" });
-
+      if (document.viewOnly)
+        throw new TRPCError({ code: "BAD_REQUEST", message: "The document is view only." });
       await ctx.prisma.document.update({
         where: {
           id: input.documentId,

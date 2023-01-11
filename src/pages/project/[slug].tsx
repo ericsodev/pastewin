@@ -8,7 +8,7 @@ import dayjs from "dayjs";
 import Head from "next/head";
 
 const gridSizingClasses =
-  "lg:grid-cols-[repeat(auto-fill,minmax(18rem,1fr))] 2xl:grid-cols-[repeat(auto-fill,minmax(20rem,1fr))] 4xl:grid-cols-[repeat(auto-fill,minmax(22rem,1fr))]";
+  "lg:grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] 2xl:grid-cols-[repeat(auto-fill,minmax(18rem,1fr))] 4xl:grid-cols-[repeat(auto-fill,minmax(20rem,1fr))]";
 
 const ProjectPage: NextPage = () => {
   const router = useRouter();
@@ -53,17 +53,12 @@ const ProjectPage: NextPage = () => {
               >
                 <h2 className="text-xl font-semibold text-slate-700 dark:text-slate-300">
                   {v.name}
-                  {/* {v. && (
-                    <div className="mt-2 w-fit rounded-lg bg-emerald-300/60 px-3 py-0.5 text-sm font-medium text-green-800 dark:bg-emerald-200/80 dark:text-green-900">
-                      published
-                    </div>
-                  )} */}
                 </h2>
 
                 <p className="max-w-xs text-slate-600 dark:text-slate-400">
                   created on{" "}
                   <strong className="font-semibold">
-                    {dayjs(v.createdAt).format("MMM D YYYY [at] h:mm A")}
+                    {dayjs(v.createdAt).format("MMM D YYYY")}
                   </strong>
                 </p>
               </div>
