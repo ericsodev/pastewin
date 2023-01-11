@@ -1,11 +1,14 @@
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import AccountMenu from "./accountMenu";
 import SettingsMenu from "./settingsMenu";
 
 export default function Navbar(): JSX.Element {
   const { data: session, status } = useSession();
+  const router = useRouter();
 
+  if (status === "authenticated" && !session.user?.displayName) router.push("/account/new-user");
   return (
     <div
       className={

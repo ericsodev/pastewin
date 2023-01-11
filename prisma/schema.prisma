@@ -57,29 +57,43 @@ model User {
 }
 
 model Document {
-  id        String   @id @unique @default(cuid())
-  name      String   @default("Document")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  content   String
-  slug      String   @unique @default(cuid())
-  project   Project  @relation(fields: [projectId], references: [id])
-  projectId String
-  published Boolean  @default(false)
+  id            String     @id @unique @default(cuid())
+  name          String     @default("Document")
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  content       String
+  slug          String     @unique @default(cuid())
+  project       Project?   @relation("OwnedDocuments", fields: [projectId], references: [id])
+  projectId     String?
+  pinnedProject Project?   @relation("PinnedDocument")
+  revisions     Revision[]
+  viewOnly      Boolean
+  discoverable  Boolean    @default(true)
+}
+
+model Revision {
+  id         String   @id @unique @default(cuid())
+  document   Document @relation(fields: [documentId], references: [id])
+  documentId String
+  name       String
+  content    String
+  createdAt  DateTime @default(now())
 }
 
 model Project {
-  id          String       @id @unique @default(cuid())
-  name        String
-  revisions   Document[]
-  owner       User         @relation("Owner", fields: [userId], references: [id])
-  editors     User[]       @relation("Editor")
-  viewers     User[]       @relation("Viewer")
-  invitations Invitation[]
-  public      Boolean      @default(false)
-  slug        String       @unique @default(cuid())
-  viewOnly    Boolean      @default(true)
-  userId      String
+  id               String       @id @unique @default(cuid())
+  name             String
+  documents        Document[]   @relation("OwnedDocuments")
+  pinnedDocument   Document?    @relation("PinnedDocument", fields: [pinnedDocumentId], references: [id])
+  owner            User         @relation("Owner", fields: [userId], references: [id])
+  editors          User[]       @relation("Editor")
+  viewers          User[]       @relation("Viewer")
+  invitations      Invitation[]
+  public           Boolean      @default(false)
+  slug             String       @unique @default(cuid())
+  viewOnly         Boolean      @default(true)
+  userId           String
+  pinnedDocumentId String?      @unique
 }
 
 model Invitation {

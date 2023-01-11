@@ -3,7 +3,7 @@ import { router, publicProcedure, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 
 export const userRouter = router({
-  getProfile: publicProcedure
+  getPublicProfile: publicProcedure
     .input(
       z
         .object({ displayName: z.string(), userId: z.string() })
@@ -23,10 +23,35 @@ export const userRouter = router({
             where: {
               public: { equals: true },
             },
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              _count: {
+                select: {
+                  documents: true,
+                },
+              },
+            },
           },
           editableProjects: {
             where: {
               public: { equals: true },
+            },
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              _count: {
+                select: {
+                  documents: true,
+                },
+              },
+              owner: {
+                select: {
+                  displayName: true,
+                },
+              },
             },
           },
         },
