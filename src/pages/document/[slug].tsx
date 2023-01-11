@@ -16,10 +16,16 @@ const DocumentPage: NextPage = () => {
     isLoading,
     isError,
     error,
+    refetch,
   } = trpc.document.getDocument.useQuery(
     { documentSlug: slug as string },
     {
       enabled: typeof slug === "string",
+      retry: false,
+      retryDelay: 5000,
+      onSuccess(data) {
+        setContent(data.content);
+      },
     }
   );
   const [content, setContent] = useState<string>("");
@@ -31,19 +37,17 @@ const DocumentPage: NextPage = () => {
       documentId: document.id,
       content: content,
     });
+    refetch();
   };
 
-  useEffect(() => {
-    if (document) {
-      setContent(document.content);
-    }
-  }, [document]);
+  // TODO: check if document is editable, need to add document route to get privileges.
 
   if (!slug) return <Error></Error>;
   if (error?.data?.code === "UNAUTHORIZED") return <Error>This document is private.</Error>;
+  if (error?.data?.code === "NOT_FOUND") return <Error>Document not found.</Error>;
   if (isError) return <Error></Error>;
   if (isLoading) return <Loading></Loading>;
-
+  console.log(document.role);
   const project = document.project;
   return (
     <div className="flex h-full flex-col gap-8 p-16 xl:px-36 2xl:px-48">
@@ -53,24 +57,28 @@ const DocumentPage: NextPage = () => {
       <div>
         <h1 className="text-4xl font-semibold text-slate-800 dark:text-slate-100">
           {document.name}{" "}
-          <span className="text-2xl font-normal text-slate-400">
-            {" "}
-            by{" "}
-            <Link href={`/account/public/${project.owner.displayName}`} className="font-medium">
-              {project.owner.displayName}
-            </Link>
-          </span>
+          {project && (
+            <span className="text-2xl font-normal text-slate-400">
+              {" "}
+              by{" "}
+              <Link href={`/account/public/${project.owner.displayName}`} className="font-medium">
+                {project.owner.displayName}
+              </Link>
+            </span>
+          )}
         </h1>
-        <h2 className="mb-4 text-lg text-slate-600 dark:text-slate-400">
-          from
-          <Link
-            href={`/project/${project.slug}`}
-            className="font-medium text-slate-700 dark:text-slate-300"
-          >
-            {" "}
-            {project.name}
-          </Link>
-        </h2>
+        {project && (
+          <h2 className="mb-4 text-lg text-slate-600 dark:text-slate-400">
+            from
+            <Link
+              href={`/project/${project.slug}`}
+              className="font-medium text-slate-700 dark:text-slate-300"
+            >
+              {" "}
+              {project.name}
+            </Link>
+          </h2>
+        )}
       </div>
       <div className="relative flex grow flex-col gap-2 py-2">
         {documentMutate.isLoading && (
@@ -88,12 +96,15 @@ const DocumentPage: NextPage = () => {
           value={content}
           onChange={(e) => setContent(e.target.value)}
         ></textarea>
-        <button
-          onClick={handleSave}
-          className="text-medium self-center rounded-md bg-green-200 px-4 py-1.5 font-medium text-green-800"
-        >
-          save
-        </button>
+
+        {["EDITOR", "OWNER"].includes(document.role) && (
+          <button
+            onClick={handleSave}
+            className="text-medium self-center rounded-md bg-green-200 px-4 py-1.5 font-medium text-green-800"
+          >
+            save
+          </button>
+        )}
       </div>
     </div>
   );

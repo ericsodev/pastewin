@@ -5,6 +5,20 @@ import { isEditAuthorized, isViewAuthorized, getAuthority } from "./projectAuthU
 
 export const documentRouter = router({
   getDocument: publicProcedure
+    /**
+     * This endpoint retrieves a document using either the document's ID or Slug
+     *
+     * Authorization Checks
+     * - If it is part of a project
+     *  - Check if the project is public or if the user has a viewer role or higher
+     * - If it is a standalone document
+     *  - Then it is public
+     *
+     * Returns
+     * - Document ID, Slug
+     * - Name, Content, Created Date
+     * - Project Name, Owner Name
+     */
     .input(
       z
         .object({ documentId: z.string(), documentSlug: z.string() })
@@ -40,18 +54,14 @@ export const documentRouter = router({
         }),
         ctx.prisma.project.findFirst({
           where: {
-            revisions: {
+            documents: {
               some: {
                 OR: [
                   {
-                    id: {
-                      equals: input.documentId,
-                    },
+                    id: input.documentId,
                   },
                   {
-                    slug: {
-                      equals: input.documentSlug,
-                    },
+                    slug: input.documentSlug,
                   },
                 ],
               },
@@ -78,13 +88,34 @@ export const documentRouter = router({
         }),
       ]);
 
-      if (!document || !project) throw new TRPCError({ code: "NOT_FOUND" });
+      if (!document) throw new TRPCError({ code: "NOT_FOUND" });
+
+      if (!project) {
+        // This is a standalone document, all viewers have access
+        return { ...document, role: "GUEST" };
+      }
+
       if (!isViewAuthorized(project, ctx.session?.user?.id))
         throw new TRPCError({ code: "UNAUTHORIZED" });
+
       return { ...document, role: getAuthority(project, ctx.session?.user?.id) };
     }),
   document: protectedProcedure
-    .input(z.object({ documentId: z.string(), content: z.string() }))
+    /**
+     * This endpoint mutates a documents content and/or name.
+     *
+     * Authorization Checks (the document must be a part of a project)
+     * - Editor
+     * - Owner
+     *
+     */
+    .input(
+      z.object({
+        documentId: z.string(),
+        name: z.string().optional(),
+        content: z.string().optional(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       const document = await ctx.prisma.document.findFirst({
         where: {
@@ -93,18 +124,6 @@ export const documentRouter = router({
         select: {
           project: {
             select: {
-              public: true,
-              revisions: {
-                orderBy: {
-                  createdAt: "desc",
-                },
-                take: 1,
-              },
-              viewers: {
-                select: {
-                  id: true,
-                },
-              },
               editors: {
                 select: {
                   id: true,
@@ -120,12 +139,13 @@ export const documentRouter = router({
         },
       });
       if (!document) throw new TRPCError({ code: "NOT_FOUND" });
+      if (!document.project)
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "The document being mutated is not part of a project",
+        });
       if (!isEditAuthorized(document.project, ctx.session.user.id))
         throw new TRPCError({ code: "UNAUTHORIZED" });
-
-      // The user is trying to update a document that is not the head
-      if (document.project.revisions[0]?.id !== input.documentId)
-        throw new TRPCError({ code: "BAD_REQUEST" });
 
       await ctx.prisma.document.update({
         where: {
@@ -138,6 +158,17 @@ export const documentRouter = router({
     }),
 
   fork: protectedProcedure
+    /**
+     * This endpoint creates a new project containing this document
+     *
+     * Authorization Check
+     * - If this document is a part of a project
+     *  - The project is public or the user has viewer authority
+     * - If this document is standalone, then any user can fork.
+     *
+     * Returns
+     * - ID and Slug of the created project
+     */
     .input(z.object({ documentId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const document = await ctx.prisma.document.findFirst({
@@ -145,6 +176,7 @@ export const documentRouter = router({
           id: input.documentId,
         },
         select: {
+          name: true,
           content: true,
           project: {
             select: {
@@ -170,22 +202,179 @@ export const documentRouter = router({
         },
       });
       if (!document) throw new TRPCError({ code: "NOT_FOUND" });
-      isViewAuthorized(document.project, ctx.session.user.id);
+      if (document.project && !isViewAuthorized(document.project, ctx.session.user.id))
+        throw new TRPCError({ code: "UNAUTHORIZED" });
 
-      const project = await ctx.prisma.project.create({
+      return await ctx.prisma.project.create({
         data: {
-          name: `${document.project.name} - forked`,
+          name: `${document.name} - forked`,
           owner: {
             connect: {
               id: ctx.session.user.id,
             },
           },
-          revisions: {
+          documents: {
             create: {
               content: document.content,
-              published: true,
+              viewOnly: false,
             },
           },
+        },
+        select: {
+          id: true,
+          slug: true,
+        },
+      });
+    }),
+  publishDocument: protectedProcedure
+    /**
+     * This endpoint saves the current document as a revision
+     *
+     * Authorization Check - (document must be part of a project)
+     * - Owner
+     */
+    .input(z.object({ documentId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const document = await ctx.prisma.document.findUnique({
+        where: {
+          id: input.documentId,
+        },
+        select: {
+          id: true,
+          name: true,
+          content: true,
+          project: {
+            select: {
+              owner: {
+                select: {
+                  id: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!document) throw new TRPCError({ code: "NOT_FOUND" });
+      if (!document.project)
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "The document being mutated is not part of a project",
+        });
+
+      // Check if user is owner
+      if (ctx.session.user.id !== document.project.owner.id)
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+
+      await ctx.prisma.revision.create({
+        data: {
+          document: {
+            connect: {
+              id: document.id,
+            },
+          },
+          name: document.name,
+          content: document.content,
+        },
+      });
+    }),
+
+  revertDocument: protectedProcedure
+    /**
+     * This endpoint reverts the document to a previous revision,
+     * deleting all revisions in between (including the target revision)
+     *
+     * Authorization Check - (document must be part of a project)
+     * - Owner
+     */
+    .input(
+      z.object({
+        documentId: z.string(),
+        revisionId: z.string(),
+        contentOnly: z.boolean().default(true),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const document = await ctx.prisma.document.findUnique({
+        where: {
+          id: input.documentId,
+        },
+        select: {
+          name: true,
+          revisions: {
+            where: {
+              id: input.revisionId,
+            },
+            select: {
+              id: true,
+              name: true,
+              content: true,
+              createdAt: true,
+            },
+          },
+          project: {
+            select: {
+              owner: {
+                select: {
+                  id: true,
+                },
+              },
+            },
+          },
+        },
+      });
+      if (!document) throw new TRPCError({ code: "NOT_FOUND" });
+      if (!document.project)
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "The document being mutated is not part of a project",
+        });
+
+      if (document.project.owner.id !== ctx.session.user.id)
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+
+      // Check if a document with this revision does not exist
+      const revision = document.revisions[0];
+      if (!revision || revision.id !== input.revisionId)
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "This revision is not part of the document",
+        });
+
+      await ctx.prisma.document.update({
+        where: {
+          id: input.documentId,
+        },
+        data: {
+          name: input.contentOnly ? undefined : revision.name,
+          content: revision.content,
+          revisions: {
+            deleteMany: {
+              createdAt: {
+                gte: revision.createdAt,
+              },
+            },
+          },
+        },
+      });
+    }),
+  createStandalone: publicProcedure
+    /**
+     * This endpoint creates a standalone document given a name and content
+     *
+     * Returns
+     * - Slug of the created document
+     */
+    .input(z.object({ name: z.string().max(35), content: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.prisma.document.create({
+        data: {
+          name: input.name,
+          content: input.content,
+          viewOnly: true,
+        },
+        select: {
+          slug: true,
         },
       });
     }),
