@@ -4,10 +4,14 @@ import { trpc } from "../../utils/trpc";
 import { Error } from "../../components/error";
 import { Loading } from "../../components/loading";
 import { signIn, useSession } from "next-auth/react";
-import { useEffect } from "react";
 
 const AccountPage: NextPage = (req, res) => {
-  const { data: session, status: sessionStatus } = useSession();
+  const { data: session, status: sessionStatus } = useSession({
+    required: true,
+    onUnauthenticated() {
+      signIn();
+    },
+  });
   const {
     data: account,
     isLoading: accountLoading,
@@ -19,9 +23,6 @@ const AccountPage: NextPage = (req, res) => {
       enabled: !!session,
     }
   );
-  useEffect(() => {
-    if (sessionStatus === "unauthenticated") signIn();
-  }, [sessionStatus]);
 
   if (accountError) return <Error></Error>;
   if (accountLoading || sessionStatus === "loading") return <Loading></Loading>;

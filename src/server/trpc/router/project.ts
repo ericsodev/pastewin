@@ -124,7 +124,7 @@ export const projectRouter = router({
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }),
   create: protectedProcedure
-    .input(z.object({ name: z.string().max(35), public: z.boolean().default(true) }))
+    .input(z.object({ name: z.string().min(1).max(35), public: z.boolean().default(true) }))
     .mutation(async ({ ctx, input }) => {
       return await ctx.prisma.project.create({
         data: {
@@ -159,7 +159,7 @@ export const projectRouter = router({
      * Returns
      * - New Document ID and Slug
      */
-    .input(z.object({ projectId: z.string(), documentName: z.string().max(35) }))
+    .input(z.object({ projectId: z.string(), documentName: z.string().min(1).max(35) }))
     .mutation(async ({ ctx, input }) => {
       const project = await ctx.prisma.project.findUnique({
         where: {

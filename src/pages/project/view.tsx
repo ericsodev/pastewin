@@ -3,17 +3,27 @@ import { trpc } from "../../utils/trpc";
 import { Loading } from "../../components/loading";
 import { Error } from "../../components/error";
 import Link from "next/link";
+import { signIn, useSession } from "next-auth/react";
 
 const gridSizingClasses =
   "lg:grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] 2xl:grid-cols-[repeat(auto-fill,minmax(18rem,1fr))] 4xl:grid-cols-[repeat(auto-fill,minmax(20rem,1fr))]";
 
 const ViewProjectPage: NextPage = (req, res) => {
+  useSession({
+    required: true,
+    onUnauthenticated() {
+      signIn();
+    },
+  });
   const { data: projects, isLoading, isError } = trpc.user.getAllProjects.useQuery();
 
   if (isError) return <Error></Error>;
   if (isLoading) return <Loading></Loading>;
   return (
-    <div className="px-12 py-12 xl:px-24 2xl:px-36">
+    <div className="flex flex-col gap-4 px-12 py-12 xl:px-24 2xl:px-36">
+      <h1 className="mb-4 text-4xl font-semibold text-slate-800 dark:text-slate-100">
+        your projects
+      </h1>
       <div className={`grid gap-4 ${gridSizingClasses}`}>
         {projects.ownedProjects.map((v) => (
           <Link href={`/project/${v.slug}`} key={v.id}>

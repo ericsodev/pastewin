@@ -13,10 +13,18 @@ interface FormSchemaType {
   public: boolean;
 }
 
-const schema = z.object({ name: z.string().max(35), public: z.boolean().default(true) });
+const schema = z.object({
+  name: z.string().min(1, "required").max(35),
+  public: z.boolean().default(true),
+});
 
 const CreateProjectPage: NextPage = (req, res) => {
-  const { status } = useSession();
+  useSession({
+    required: true,
+    onUnauthenticated() {
+      signIn();
+    },
+  });
   const router = useRouter();
   const projectMutation = trpc.project.create.useMutation();
   const handleSubmit = async (data: FormSchemaType) => {
@@ -24,7 +32,6 @@ const CreateProjectPage: NextPage = (req, res) => {
     router.push(`/project/${proj.slug}`);
   };
 
-  if (status === "unauthenticated") signIn();
   if (projectMutation.isLoading) return <Loading></Loading>;
   if (projectMutation.isError) return <Error></Error>;
 
