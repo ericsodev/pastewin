@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { BiLogOutCircle } from "react-icons/bi";
 import { MdAccountCircle } from "react-icons/md";
-import { useColorMode } from "../../contexts/colorModeContext";
 import { trpc } from "../../utils/trpc";
 
 export default function AccountMenu(): JSX.Element {

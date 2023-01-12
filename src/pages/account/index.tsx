@@ -26,7 +26,12 @@ const AccountPage: NextPage = (req, res) => {
 
   if (accountError) return <Error></Error>;
   if (accountLoading || sessionStatus === "loading") return <Loading></Loading>;
-  return <div>{account.ownedProjects.map((x) => x.name)}</div>;
+  return (
+    <div className="flex flex-col gap-4">
+      <h1>hey there {session.user?.displayName}</h1>
+      {account.ownedProjects.map((x) => x.name)}
+    </div>
+  );
 };
 
 export default AccountPage;

@@ -1,28 +1,28 @@
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { RegisterModal } from "../NewAccountModal";
 import AccountMenu from "./accountMenu";
 import SettingsMenu from "./settingsMenu";
 
 export default function Navbar(): JSX.Element {
   const { data: session, status } = useSession();
+  const [isRegisterModalOpen, setModalOpen] = useState<boolean>(false);
   const router = useRouter();
 
   useEffect(() => {
-    if (
-      status === "authenticated" &&
-      !session.user?.displayName &&
-      router.pathname !== "/account/new-user"
-    )
-      router.push("/account/new-user");
-  }, [status, session, router]);
+    if (status === "authenticated" && !session.user?.displayName) {
+      setModalOpen(true);
+    }
+  }, [status, session, router, setModalOpen]);
   return (
     <div
       className={
         "flex w-full items-center justify-center gap-5 bg-gradient-to-b from-slate-400/40 to-transparent px-5 pt-3.5 pb-8 backdrop-blur-xl dark:from-slate-900/70 dark:to-transparent"
       }
     >
+      <RegisterModal open={isRegisterModalOpen} setOpen={setModalOpen}></RegisterModal>
       <Link
         href="/"
         className={
