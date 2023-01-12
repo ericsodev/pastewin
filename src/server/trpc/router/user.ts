@@ -114,6 +114,11 @@ export const userRouter = router({
                 displayName: true,
               },
             },
+            _count: {
+              select: {
+                documents: true,
+              },
+            },
           },
         },
         editableProjects: {
@@ -126,6 +131,11 @@ export const userRouter = router({
                 displayName: true,
               },
             },
+            _count: {
+              select: {
+                documents: true,
+              },
+            },
           },
         },
         viewableProjects: {
@@ -136,6 +146,11 @@ export const userRouter = router({
             owner: {
               select: {
                 displayName: true,
+              },
+            },
+            _count: {
+              select: {
+                documents: true,
               },
             },
           },
