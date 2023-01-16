@@ -39,9 +39,6 @@ const ProjectPage: NextPage = () => {
         <title>{project.name} | PasteWin</title>
       </Head>
       <div className="flex h-max flex-row items-end gap-2">
-        {/* <h1 className="max-w-[24ch] truncate text-4xl font-semibold text-slate-800 dark:text-slate-100">
-          {project.name}{" "}
-        </h1> */}
         <TitleInput project={project} refetch={refetch}></TitleInput>
         <span className="text-2xl font-normal text-slate-400">
           {" "}

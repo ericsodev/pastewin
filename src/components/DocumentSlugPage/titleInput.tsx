@@ -8,22 +8,22 @@ import { useClickOutside } from "../../hooks/useClickOutside";
 import { CheckIcon } from "@heroicons/react/24/solid";
 
 interface Props {
-  project: Pick<RouterOutputs["project"]["overview"], "name" | "id">;
+  document: Pick<RouterOutputs["project"]["overview"]["documents"][0], "name" | "id">;
   refetch: () => void;
 }
 
 const schema = z.object({ title: z.string().min(1, "required").max(35) });
 type FormSchema = z.infer<typeof schema>;
 
-export function TitleInput({ project, refetch }: Props): JSX.Element {
+export function TitleInput({ document, refetch }: Props): JSX.Element {
   const ref = useRef(null);
   const [expanded, setExpanded] = useState(false);
   useClickOutside(ref, (e) => setExpanded(false));
 
-  const projectMutation = trpc.project.renameProject.useMutation();
+  const documentMutation = trpc.document.document.useMutation();
   const handleSubmit = async (values: FormSchema) => {
-    if (values.title !== project.name) {
-      await projectMutation.mutateAsync({ projectId: project.id, newName: values.title });
+    if (values.title !== document.name) {
+      await documentMutation.mutateAsync({ documentId: document.id, name: values.title });
       refetch();
     }
     setExpanded(false);
@@ -34,13 +34,13 @@ export function TitleInput({ project, refetch }: Props): JSX.Element {
         onClick={() => {
           setExpanded(true);
         }}
-        className="group"
+        className=""
         ref={ref}
       >
         {expanded ? (
           <Formik
             initialValues={{
-              title: project.name,
+              title: document.name,
             }}
             validationSchema={toFormikValidationSchema(schema)}
             onSubmit={handleSubmit}
@@ -60,7 +60,7 @@ export function TitleInput({ project, refetch }: Props): JSX.Element {
           </Formik>
         ) : (
           <h1 className="max-w-[24ch] truncate text-4xl font-semibold text-slate-800 dark:text-slate-100">
-            {project.name}{" "}
+            {document.name}{" "}
           </h1>
         )}
       </div>

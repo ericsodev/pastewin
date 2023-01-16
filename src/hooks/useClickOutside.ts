@@ -1,4 +1,8 @@
 import { useEffect } from "react";
+/**
+ * from use-tshooks
+ */
+
 export function useClickOutside(
   ref: React.RefObject<HTMLElement>,
   handler: (event: MouseEvent | TouchEvent) => void
