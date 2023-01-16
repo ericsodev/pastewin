@@ -1,10 +1,8 @@
 import { Menu } from "@headlessui/react";
-import { UserCircleIcon } from "@heroicons/react/24/solid";
+import { ArrowLeftCircleIcon, UserCircleIcon } from "@heroicons/react/24/solid";
 import { signIn, signOut } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
-import { BiLogOutCircle } from "react-icons/bi";
-import { MdAccountCircle } from "react-icons/md";
 import { trpc } from "../../utils/trpc";
 
 export default function AccountMenu(): JSX.Element {
@@ -42,8 +40,8 @@ export default function AccountMenu(): JSX.Element {
                 href={`/account`}
                 className="my-1 inline-flex w-full items-center justify-start gap-1.5 rounded-md p-2 hover:bg-slate-200 hover:bg-opacity-70"
               >
-                <MdAccountCircle className="text-lg"></MdAccountCircle>
-                account
+                <UserCircleIcon className="h-5 w-5"></UserCircleIcon>
+                Account
               </Link>
             )}
           </Menu.Item>
@@ -55,7 +53,7 @@ export default function AccountMenu(): JSX.Element {
                 onClick={() => signOut()}
                 className="inline-flex w-max items-center justify-start gap-1.5 rounded-md p-2 hover:bg-slate-200 hover:bg-opacity-70"
               >
-                <BiLogOutCircle className="text-lg"></BiLogOutCircle>
+                <ArrowLeftCircleIcon className="h-5 w-5"></ArrowLeftCircleIcon>
                 Logout
               </button>
             )}
