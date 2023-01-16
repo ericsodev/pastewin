@@ -9,12 +9,14 @@ import Head from "next/head";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { NewDocumentModal } from "../../components/ProjectSlugPage/createDocumentModal";
+import { TitleInput } from "../../components/ProjectSlugPage/titleInput";
 
 const gridSizingClasses =
   "lg:grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] 2xl:grid-cols-[repeat(auto-fill,minmax(18rem,1fr))] 4xl:grid-cols-[repeat(auto-fill,minmax(20rem,1fr))]";
 
 const ProjectPage: NextPage = () => {
   const router = useRouter();
+  const context = trpc.useContext();
   const { slug } = router.query;
   const {
     data: project,
@@ -27,7 +29,6 @@ const ProjectPage: NextPage = () => {
       enabled: typeof slug === "string",
     }
   );
-  const createDocument = trpc.project.createDocument.useMutation();
   const [modalOpen, setModalOpen] = useState<boolean>(false);
 
   if (isError) return <Error></Error>;
@@ -38,9 +39,10 @@ const ProjectPage: NextPage = () => {
         <title>{project.name} | PasteWin</title>
       </Head>
       <div className="flex h-max flex-row items-end gap-2">
-        <h1 className="max-w-[24ch] truncate text-4xl font-semibold text-slate-800 dark:text-slate-100">
+        {/* <h1 className="max-w-[24ch] truncate text-4xl font-semibold text-slate-800 dark:text-slate-100">
           {project.name}{" "}
-        </h1>
+        </h1> */}
+        <TitleInput project={project} refetch={refetch}></TitleInput>
         <span className="text-2xl font-normal text-slate-400">
           {" "}
           by{" "}
