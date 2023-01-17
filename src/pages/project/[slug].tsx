@@ -10,13 +10,13 @@ import { PlusIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { NewDocumentModal } from "../../components/ProjectSlugPage/createDocumentModal";
 import { TitleInput } from "../../components/ProjectSlugPage/titleInput";
+import { InviteModal } from "../../components/ProjectSlugPage/inviteModal";
 
 const gridSizingClasses =
   "lg:grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] 2xl:grid-cols-[repeat(auto-fill,minmax(18rem,1fr))] 4xl:grid-cols-[repeat(auto-fill,minmax(20rem,1fr))]";
 
 const ProjectPage: NextPage = () => {
   const router = useRouter();
-  const context = trpc.useContext();
   const { slug } = router.query;
   const {
     data: project,
@@ -29,7 +29,8 @@ const ProjectPage: NextPage = () => {
       enabled: typeof slug === "string",
     }
   );
-  const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [documentModalOpen, setDocumentModalOpen] = useState<boolean>(false);
+  const [inviteModalOpen, setInviteModalOpen] = useState<boolean>(false);
 
   if (isError) return <Error></Error>;
   if (isLoading) return <Loading></Loading>;
@@ -72,19 +73,31 @@ const ProjectPage: NextPage = () => {
           ))}
           <div
             tabIndex={0}
-            onClick={() => setModalOpen(true)}
+            onClick={() => setDocumentModalOpen(true)}
             className="group flex cursor-pointer items-center justify-center gap-10 rounded-md border-[2px] border-white/50 bg-gradient-to-br from-white/40 to-white/10 px-8 py-6 hover:border-white/30 hover:from-white/30 dark:border-gray-800 dark:from-gray-900 dark:to-gray-800/50 dark:hover:border-violet-500/40"
           >
             <PlusIcon className="h-9 w-9 transform text-slate-700 transition-transform duration-75 group-hover:scale-110 group-focus:scale-90"></PlusIcon>
           </div>
         </div>
       </div>
+      <button
+        onClick={() => setInviteModalOpen(true)}
+        className="self-start rounded-md bg-green-300 px-3 py-1.5 font-medium text-green-800"
+      >
+        open sesame
+      </button>
       <NewDocumentModal
         refresh={() => refetch()}
         projectId={project.id}
-        open={modalOpen}
-        setOpen={setModalOpen}
+        open={documentModalOpen}
+        setOpen={setDocumentModalOpen}
       ></NewDocumentModal>
+      <InviteModal
+        open={inviteModalOpen}
+        setOpen={setInviteModalOpen}
+        project={project}
+        refresh={refetch}
+      ></InviteModal>
     </div>
   );
 };
