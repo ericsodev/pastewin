@@ -1,9 +1,17 @@
 import { Menu } from "@headlessui/react";
 import { Cog6ToothIcon, MoonIcon, SunIcon, UserCircleIcon } from "@heroicons/react/24/solid";
-import { useColorMode } from "../../contexts/colorModeContext";
+import { useDarkMode } from "usehooks-ts";
+import { useEffect } from "react";
 
 export default function SettingsMenu(): JSX.Element {
-  const { color, toggleColor } = useColorMode();
+  const { isDarkMode, toggle, enable, disable } = useDarkMode();
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [isDarkMode]);
   return (
     <Menu as="div" className="relative">
       <Menu.Button className="rounded-md border-solid bg-slate-50/80 p-1.5 font-medium text-slate-500 backdrop-blur-2xl transition-all hover:bg-slate-50/60 focus:bg-slate-50/90 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-800/80 dark:focus:bg-slate-700/80">
@@ -24,10 +32,10 @@ export default function SettingsMenu(): JSX.Element {
           <Menu.Item>
             {({ active }) => (
               <button
-                onClick={() => toggleColor()}
+                onClick={() => toggle()}
                 className="inline-flex w-max items-center justify-start gap-1.5 rounded-md p-2 hover:bg-slate-200 hover:bg-opacity-70"
               >
-                {color === "light" ? (
+                {!isDarkMode ? (
                   <SunIcon className="h-5 w-5"></SunIcon>
                 ) : (
                   <MoonIcon className="h-5 w-5"></MoonIcon>
