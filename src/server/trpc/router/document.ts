@@ -154,6 +154,7 @@ export const documentRouter = router({
           id: input.documentId,
         },
         data: {
+          name: input.name,
           content: input.content,
         },
       });
