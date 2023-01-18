@@ -1,4 +1,5 @@
-import { UserPlusIcon } from "@heroicons/react/24/solid";
+import { CheckIcon, UserPlusIcon } from "@heroicons/react/24/solid";
+import { useInvites } from "../../../contexts/inviteContext";
 import type { RouterOutputs } from "../../../utils/trpc";
 import { RoleBadge } from "./roleBadge";
 
@@ -11,21 +12,34 @@ interface Props {
 }
 
 export function UserResult({ displayName, project }: Props): JSX.Element {
+  const { state: invites, dispatch: dispatchInvite } = useInvites();
   const role = getRole(displayName, project);
   return (
     <div
       key={displayName}
-      className="flex flex-row items-center justify-between rounded-md bg-slate-50 py-2 px-3"
+      className="flex flex-row items-center justify-between rounded-md bg-slate-50 py-1.5 pl-5 pr-3"
     >
       <h1 className="font-medium text-slate-600">{displayName}</h1>
       <div className="flex items-stretch gap-2">
         <RoleBadge role={getRole(displayName, project)}></RoleBadge>
         <button
-          className="rounded-lg bg-emerald-200 py-1 px-3 text-green-800 disabled:bg-emerald-700/10 disabled:text-green-700/60"
-          disabled={role === "OWNER"}
+          onClick={() => {
+            dispatchInvite({ type: "ADD", payload: { displayName: displayName, role: "VIEWER" } });
+          }}
+          className="flex w-24 items-center justify-start rounded-lg bg-emerald-200 py-1 px-3 text-green-800 disabled:bg-emerald-700/10 disabled:text-green-700/60"
+          disabled={role === "OWNER" || displayName in invites}
         >
-          <UserPlusIcon className="inline-block h-4 w-4 "></UserPlusIcon>
-          <text className="ml-2 text-sm font-medium">invite</text>
+          {displayName in invites ? (
+            <>
+              <UserPlusIcon className="inline-block h-4 w-4 "></UserPlusIcon>
+              <text className="ml-2 text-sm font-medium">invited</text>
+            </>
+          ) : (
+            <>
+              <CheckIcon className="inline-block h-4 w-4 "></CheckIcon>
+              <text className="ml-2 text-sm font-medium">invite</text>
+            </>
+          )}
         </button>
       </div>
     </div>
