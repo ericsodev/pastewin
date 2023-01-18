@@ -36,7 +36,7 @@ const CreateProjectPage: NextPage = (req, res) => {
   if (projectMutation.isError) return <Error></Error>;
 
   return (
-    <div className="flex h-full flex-col items-center justify-center">
+    <div className="flex grow flex-col items-center justify-center">
       <div className="flex flex-col gap-6 rounded-md border border-gray-100 bg-purple-50 bg-opacity-30 bg-clip-padding p-12 shadow-sm backdrop-blur-md backdrop-filter dark:border-gray-800 dark:bg-ch-gray-900/80 dark:hover:border-violet-300/80">
         <h1 className="text-2xl font-medium text-slate-700 dark:text-slate-200">New Project</h1>
         <Formik
