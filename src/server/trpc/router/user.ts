@@ -296,4 +296,19 @@ export const userRouter = router({
       });
       return !!user;
     }),
+  findUser: protectedProcedure
+    .input(z.string().min(1).max(20))
+    .query(async ({ ctx, input: name }) => {
+      return await ctx.prisma.user.findMany({
+        where: {
+          displayName: {
+            startsWith: name,
+          },
+        },
+        select: {
+          displayName: true,
+        },
+        take: 10,
+      });
+    }),
 });

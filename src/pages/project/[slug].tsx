@@ -10,7 +10,7 @@ import { PlusIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { NewDocumentModal } from "../../components/ProjectSlugPage/createDocumentModal";
 import { TitleInput } from "../../components/ProjectSlugPage/titleInput";
-import { InviteModal } from "../../components/ProjectSlugPage/inviteModal";
+import { InviteModal } from "../../components/ProjectSlugPage/inviteModal/inviteModal";
 
 const gridSizingClasses =
   "lg:grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] 2xl:grid-cols-[repeat(auto-fill,minmax(18rem,1fr))] 4xl:grid-cols-[repeat(auto-fill,minmax(20rem,1fr))]";
@@ -49,6 +49,12 @@ const ProjectPage: NextPage = () => {
           </Link>
         </span>
       </div>
+      <button
+        onClick={() => setInviteModalOpen(true)}
+        className="self-start rounded-md bg-green-300 px-4 py-2 font-medium text-green-800"
+      >
+        Invite Users
+      </button>
       <div>
         <h2 className="mb-4 text-2xl font-medium text-slate-700 dark:text-slate-300">documents</h2>
         <div className={`grid auto-rows-fr gap-4 ${gridSizingClasses}`}>
@@ -80,12 +86,6 @@ const ProjectPage: NextPage = () => {
           </div>
         </div>
       </div>
-      <button
-        onClick={() => setInviteModalOpen(true)}
-        className="self-start rounded-md bg-green-300 px-3 py-1.5 font-medium text-green-800"
-      >
-        open sesame
-      </button>
       <NewDocumentModal
         refresh={() => refetch()}
         projectId={project.id}
