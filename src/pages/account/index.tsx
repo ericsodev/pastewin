@@ -29,7 +29,7 @@ const AccountPage: NextPage = (req, res) => {
   if (accountError) return <Error></Error>;
   if (accountLoading || sessionStatus === "loading") return <Loading></Loading>;
   return (
-    <div className="flex flex-col gap-8 px-12 py-12 lg:gap-12 xl:gap-16 xl:px-24 2xl:px-36">
+    <div className="flex h-fit flex-col gap-8 px-12 py-12 lg:gap-12 xl:gap-16 xl:px-24 2xl:px-36">
       <span className="text-xl text-slate-600 dark:text-slate-300">
         hey there
         <h1 className="max-w-[24ch] truncate text-4xl font-semibold text-slate-800 dark:text-slate-100">
