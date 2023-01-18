@@ -3,13 +3,13 @@ import React from "react";
 const INVITABLE_ROLES = ["VIEWER", "EDITOR"];
 type InvitableRole = "VIEWER" | "EDITOR";
 
-type ActionType = "ADD" | "REMOVE" | "UPDATE";
+type ActionType = "ADD" | "REMOVE" | "UPDATE" | "CLEAR";
 type InviteAction = {
   type: ActionType;
   payload?: { displayName: string; role?: InvitableRole };
 };
 
-type InviteState = {
+export type InviteState = {
   [displayName: string]: InvitableRole;
 };
 
@@ -51,6 +51,9 @@ function inviteReducer(state: InviteState, action: InviteAction) {
         throw new Error("Update action requires displayName and role.");
       }
       newState[action.payload?.displayName] = action.payload?.role as InvitableRole;
+      break;
+    case "CLEAR":
+      newState = {};
       break;
   }
   return newState;

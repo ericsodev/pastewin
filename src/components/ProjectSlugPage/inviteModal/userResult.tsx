@@ -21,7 +21,7 @@ export function UserResult({ displayName, project }: Props): JSX.Element {
     >
       <h1 className="font-medium text-slate-600">{displayName}</h1>
       <div className="flex items-stretch gap-2">
-        <RoleBadge role={getRole(displayName, project)}></RoleBadge>
+        <RoleBadge role={role}></RoleBadge>
         <button
           onClick={() => {
             dispatchInvite({ type: "ADD", payload: { displayName: displayName, role: "VIEWER" } });
@@ -31,13 +31,15 @@ export function UserResult({ displayName, project }: Props): JSX.Element {
         >
           {displayName in invites ? (
             <>
-              <UserPlusIcon className="inline-block h-4 w-4 "></UserPlusIcon>
-              <text className="ml-2 text-sm font-medium">invited</text>
+              <CheckIcon className="inline-block h-4 w-4 "></CheckIcon>
+              <text className="ml-2 text-sm font-medium">added</text>
             </>
           ) : (
             <>
-              <CheckIcon className="inline-block h-4 w-4 "></CheckIcon>
-              <text className="ml-2 text-sm font-medium">invite</text>
+              <UserPlusIcon className="inline-block h-4 w-4 "></UserPlusIcon>
+              <text className="ml-2 text-sm font-medium">
+                {role === "NONE" ? "invite" : "edit"}
+              </text>
             </>
           )}
         </button>

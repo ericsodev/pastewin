@@ -1,10 +1,12 @@
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 import { useDebounce } from "usehooks-ts";
+import type { InviteState } from "../../../contexts/inviteContext";
 import { InviteProvider } from "../../../contexts/inviteContext";
 import type { RouterOutputs } from "../../../utils/trpc";
 import { trpc } from "../../../utils/trpc";
 import { InvitedMembers } from "./invitedMembers";
+import { SubmitButton } from "./submitButton";
 import { UserResult } from "./userResult";
 
 interface Props {
@@ -16,18 +18,14 @@ interface Props {
 
 type Project = Pick<RouterOutputs["project"]["overview"], "id" | "editors" | "viewers" | "owner">;
 
-type Invitee = {
-  role: "VIEWER" | "EDITOR";
-  displayName: string;
-};
-
 type SearchResult = RouterOutputs["user"]["findUser"];
 
-export function InviteModal({ open, setOpen, project }: Props): JSX.Element {
+export function InviteModal({ open, setOpen, project, refresh }: Props): JSX.Element {
   const ctx = trpc.useContext();
+  const inviteMutation = trpc.project.invite.useMutation();
 
   const [input, setInput] = useState<string>();
-  const debouncedInput = useDebounce(input, 200);
+  const debouncedInput = useDebounce(input, 300);
   const [searchResults, setSearchResults] = useState<SearchResult>([]);
 
   useEffect(() => {
@@ -36,7 +34,21 @@ export function InviteModal({ open, setOpen, project }: Props): JSX.Element {
       return;
     }
     ctx.user.findUser.fetch(debouncedInput).then(setSearchResults);
-  }, [debouncedInput, ctx.user.findUser]);
+  }, [debouncedInput, setSearchResults]);
+
+  const sendInvites = useCallback(
+    async (invites: InviteState) => {
+      console.log("hey");
+      const invitees = Array.from(
+        Object.entries(invites).map(([name, role]) => {
+          return { displayName: name, role: role };
+        })
+      );
+      await inviteMutation.mutateAsync({ projectId: project.id, invitees: invitees });
+      refresh();
+    },
+    [inviteMutation, project.id]
+  );
 
   return (
     <Transition appear show={open} as={Fragment}>
@@ -94,10 +106,8 @@ export function InviteModal({ open, setOpen, project }: Props): JSX.Element {
                         ))}
                       </div>
                     </div>
-                    <button className="self-center rounded-md border border-transparent bg-violet-100 px-4 py-2 text-sm font-medium text-violet-900 hover:bg-violet-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 ">
-                      send invites
-                    </button>
                   </div>
+                  <SubmitButton sendInvites={sendInvites}></SubmitButton>
                 </InviteProvider>
               </Dialog.Panel>
             </Transition.Child>

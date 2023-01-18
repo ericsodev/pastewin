@@ -6,7 +6,10 @@ export function InvitedMembers(): JSX.Element {
   return (
     <div>
       <h1 className="mb-2 font-medium text-slate-600">Selected Users</h1>
-      <div className="flex flex-col gap-2">
+      <div className="flex max-h-48 flex-col gap-2">
+        {Object.keys(invites).length === 0 && (
+          <span className="self-center text-slate-600">no selected users</span>
+        )}
         {Object.entries(invites).map(([displayName, role]) => (
           <div
             key={displayName}
@@ -14,7 +17,7 @@ export function InvitedMembers(): JSX.Element {
           >
             <h1 className="font-medium text-slate-600">{displayName}</h1>
             <div>
-              <InviteDropdown currentRole={role}></InviteDropdown>
+              <InviteDropdown displayName={displayName} currentRole={role}></InviteDropdown>
             </div>
           </div>
         ))}

@@ -6,10 +6,10 @@ export function RoleBadge({ role }: Props) {
   let colorClasses = "";
   switch (role) {
     case "VIEWER":
-      colorClasses = "";
+      colorClasses = "bg-orange-100 text-orange-600";
       break;
     case "EDITOR":
-      colorClasses = "";
+      colorClasses = "bg-orange-100 text-orange-600";
       break;
     case "OWNER":
       colorClasses = "bg-violet-100 text-violet-600";

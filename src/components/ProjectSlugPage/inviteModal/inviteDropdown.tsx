@@ -1,17 +1,24 @@
 import { Listbox } from "@headlessui/react";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/24/solid";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useInvites } from "../../../contexts/inviteContext";
 
 const SelectableRoles = ["VIEWER", "EDITOR"];
 type SelectableRole = typeof SelectableRoles[number];
 type Role = "NONE" | "VIEWER" | "EDITOR" | "OWNER";
+type InvitableRole = "VIEWER" | "EDITOR";
 
 interface Props {
-  currentRole: Role;
+  currentRole: InvitableRole;
+  displayName: string;
 }
 
-export function InviteDropdown({ currentRole }: Props): JSX.Element {
-  const [selectedRole, setSelectedRole] = useState<Role>(currentRole);
+export function InviteDropdown({ displayName, currentRole }: Props): JSX.Element {
+  const { dispatch: dispatchInvite } = useInvites();
+  const [selectedRole, setSelectedRole] = useState<InvitableRole>(currentRole);
+  useEffect(() => {
+    dispatchInvite({ type: "UPDATE", payload: { displayName: displayName, role: selectedRole } });
+  }, [selectedRole, dispatchInvite, displayName]);
   return (
     <div className="relative">
       <Listbox value={selectedRole} onChange={setSelectedRole}>
@@ -26,7 +33,7 @@ export function InviteDropdown({ currentRole }: Props): JSX.Element {
             <Listbox.Option
               key={role}
               value={role}
-              disabled={currentRole === role || currentRole === "OWNER"}
+              disabled={currentRole === role}
               className="flex cursor-default   bg-slate-50 px-2 py-1.5  text-sm text-slate-800 hover:bg-violet-200/80 hover:text-violet-800"
             >
               {({ selected }) => (
