@@ -1,14 +1,15 @@
 import { Menu } from "@headlessui/react";
 import { ArrowLeftCircleIcon, UserCircleIcon } from "@heroicons/react/24/solid";
-import { signIn, signOut } from "next-auth/react";
+import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { trpc } from "../../utils/trpc";
 
 export default function AccountMenu(): JSX.Element {
-  const { data: session } = trpc.auth.getSession.useQuery();
+  const { data: session, status } = useSession();
 
-  if (!session)
+  if (status === "loading") return <></>;
+  if (status === "unauthenticated" || !session)
     return (
       <button
         onClick={() => signIn()}
@@ -17,6 +18,7 @@ export default function AccountMenu(): JSX.Element {
         Sign in
       </button>
     );
+
   return (
     <Menu as="div" className="relative">
       <Menu.Button className="rounded-md border-solid border-white">
