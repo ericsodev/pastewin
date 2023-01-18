@@ -48,12 +48,12 @@ export default function AccountMenu(): JSX.Element {
             )}
           </Menu.Item>
         </div>
-        <div className="px-0.5 py-0.5">
+        <div className="w-full px-0.5 py-0.5">
           <Menu.Item>
             {({ active }) => (
               <button
                 onClick={() => signOut()}
-                className="inline-flex w-max items-center justify-start gap-1.5 rounded-md p-2 hover:bg-slate-200 hover:bg-opacity-70"
+                className="inline-flex w-full items-center justify-start gap-1.5 rounded-md p-2 hover:bg-slate-200 hover:bg-opacity-70"
               >
                 <ArrowLeftCircleIcon className="h-5 w-5"></ArrowLeftCircleIcon>
                 Logout
