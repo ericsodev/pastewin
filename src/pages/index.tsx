@@ -4,7 +4,7 @@ import { trpc } from "../utils/trpc";
 
 export default function Home() {
   return (
-    <div className="flex h-full items-center justify-center">
+    <div className="flex grow items-center justify-center">
       <div className="relative flex w-1/3 flex-col justify-center gap-4">
         <div className="absolute top-0 bottom-0 right-0 left-0 ">{/* glow */}</div>
         <h1 className="m-0 w-full text-7xl font-bold text-slate-700 dark:text-violet-50 dark:drop-shadow-[0_35px_35px_rgba(179,118,219,0.25)]">
