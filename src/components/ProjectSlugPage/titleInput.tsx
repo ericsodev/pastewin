@@ -8,7 +8,7 @@ import { useClickOutside } from "../../hooks/useClickOutside";
 import { CheckIcon } from "@heroicons/react/24/solid";
 
 interface Props {
-  project: Pick<RouterOutputs["project"]["overview"], "name" | "id">;
+  project: Pick<RouterOutputs["project"]["overview"], "name" | "id" | "role">;
   refetch: () => void;
 }
 
@@ -28,6 +28,7 @@ export function TitleInput({ project, refetch }: Props): JSX.Element {
     }
     setExpanded(false);
   };
+  console.log(project.role);
   return (
     <>
       <div
@@ -37,7 +38,7 @@ export function TitleInput({ project, refetch }: Props): JSX.Element {
         className="group"
         ref={ref}
       >
-        {expanded ? (
+        {expanded && project.role === "OWNER" ? (
           <Formik
             initialValues={{
               title: project.name,

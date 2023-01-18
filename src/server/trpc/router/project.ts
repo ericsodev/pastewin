@@ -107,7 +107,8 @@ export const projectRouter = router({
       });
 
       if (!project) throw new TRPCError({ code: "NOT_FOUND" });
-      if (project.public) return { ...project, role: "VIEWER" };
+      if (project.public && ctx.session?.user?.id === undefined)
+        return { ...project, role: "VIEWER" };
       if (!ctx.session?.user?.id) throw new TRPCError({ code: "UNAUTHORIZED" });
 
       if (project.editors.some((u) => u.id === ctx.session?.user?.id)) {
@@ -315,11 +316,20 @@ export const projectRouter = router({
     }),
   invite: protectedProcedure
     .input(
-      z.object({
-        projectId: z.string(),
-        displayName: z.string(),
-        role: z.enum(["EDITOR", "VIEWER"]),
-      })
+      z
+        .object({
+          projectId: z.string(),
+          invitees: z.array(
+            z.object({
+              displayName: z.string(),
+              role: z.enum(["VIEWER", "EDITOR"]),
+            })
+          ),
+        })
+        .refine((z) => {
+          const names = z.invitees.map((x) => x.displayName);
+          return new Set(names).size === names.length;
+        }, "Duplicate invitees")
     )
     .mutation(async ({ ctx, input }) => {
       const project = await ctx.prisma.project.findUnique({
@@ -337,34 +347,64 @@ export const projectRouter = router({
       if (!project) throw new TRPCError({ code: "NOT_FOUND" });
       if (project.owner.id !== ctx.session.user.id) throw new TRPCError({ code: "UNAUTHORIZED" });
 
-      if (input.role === "EDITOR") {
-        await ctx.prisma.project.update({
-          where: {
-            id: input.projectId,
-          },
-          data: {
-            editors: {
-              connect: {
-                displayName: input.displayName,
-              },
-            },
-          },
+      const newEditors = input.invitees
+        .filter((x) => x.role === "EDITOR")
+        .map((x) => {
+          return { displayName: x.displayName };
         });
-      }
-      if (input.role === "VIEWER") {
-        await ctx.prisma.project.update({
-          where: {
-            id: input.projectId,
-          },
-          data: {
-            viewers: {
-              connect: {
-                displayName: input.displayName,
-              },
-            },
-          },
+      const newViewers = input.invitees
+        .filter((x) => x.role === "VIEWER")
+        .map((x) => {
+          return { displayName: x.displayName };
         });
-      }
+
+      /**
+       * Connect project editors and viewers by displayName
+       * Disconnect any promoted/demoted users (e.g. used to be viewer, now editor)
+       */
+      await ctx.prisma.project.update({
+        where: {
+          id: input.projectId,
+        },
+        data: {
+          editors: {
+            connect: newEditors,
+            disconnect: newViewers,
+          },
+          viewers: {
+            connect: newViewers,
+            disconnect: newEditors,
+          },
+        },
+      });
+      // if (input.role === "EDITOR") {
+      //   await ctx.prisma.project.update({
+      //     where: {
+      //       id: input.projectId,
+      //     },
+      //     data: {
+      //       editors: {
+      //         connect: {
+      //           displayName: input.displayName,
+      //         },
+      //       },
+      //     },
+      //   });
+      // }
+      // if (input.role === "VIEWER") {
+      //   await ctx.prisma.project.update({
+      //     where: {
+      //       id: input.projectId,
+      //     },
+      //     data: {
+      //       viewers: {
+      //         connect: {
+      //           displayName: input.displayName,
+      //         },
+      //       },
+      //     },
+      //   });
+      // }
     }),
   uninvite: protectedProcedure
     .input(z.object({ projectId: z.string(), displayName: z.string() }))

@@ -35,8 +35,7 @@ export function EditableProjectCards({ editableProjects }: Props): JSX.Element {
               {v._count.documents === 1 ? "" : "s"}
             </p>
             <p className="max-w-xs text-slate-600 dark:text-slate-400">
-              created by
-              <strong className="font-semibold">{v.owner.displayName}</strong>
+              created by <strong className="font-semibold">{v.owner.displayName}</strong>
             </p>
           </div>
         </Link>
