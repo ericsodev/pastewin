@@ -11,6 +11,7 @@ import { useState } from "react";
 import { NewDocumentModal } from "../../components/ProjectSlugPage/createDocumentModal";
 import { TitleInput } from "../../components/ProjectSlugPage/titleInput";
 import { InviteModal } from "../../components/ProjectSlugPage/inviteModal/inviteModal";
+import { UserPlusIcon } from "@heroicons/react/24/solid";
 
 const gridSizingClasses =
   "lg:grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] 2xl:grid-cols-[repeat(auto-fill,minmax(18rem,1fr))] 4xl:grid-cols-[repeat(auto-fill,minmax(20rem,1fr))]";
@@ -49,12 +50,15 @@ const ProjectPage: NextPage = () => {
           </Link>
         </span>
       </div>
-      <button
-        onClick={() => setInviteModalOpen(true)}
-        className="self-start rounded-md bg-green-300 px-4 py-2 font-medium text-green-800"
-      >
-        Invite Users
-      </button>
+      {project.role === "OWNER" && (
+        <button
+          onClick={() => setInviteModalOpen(true)}
+          className="flex items-center gap-2 self-start rounded-md bg-green-300 px-4 py-2 font-medium text-green-800"
+        >
+          <UserPlusIcon className="h-4 w-4"></UserPlusIcon>
+          invite users
+        </button>
+      )}
       <div>
         <h2 className="mb-4 text-2xl font-medium text-slate-700 dark:text-slate-300">documents</h2>
         <div className={`grid auto-rows-fr gap-4 ${gridSizingClasses}`}>
