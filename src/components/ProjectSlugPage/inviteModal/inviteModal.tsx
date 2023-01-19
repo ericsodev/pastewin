@@ -7,7 +7,7 @@ import type { RouterOutputs } from "../../../utils/trpc";
 import { trpc } from "../../../utils/trpc";
 import { InvitedMembers } from "./invitedMembers";
 import { SubmitButton } from "./submitButton";
-import { UserResult } from "./userResult";
+import { UserSearchResult } from "./userSearchResults";
 
 interface Props {
   open: boolean;
@@ -99,15 +99,10 @@ export function InviteModal({ open, setOpen, project, refresh }: Props): JSX.Ele
                       <h1 className="font-medium text-slate-600">
                         {searchResults.length} {searchResults.length === 1 ? "result" : "results"}
                       </h1>
-                      <div className="mt-2 flex flex-col gap-2">
-                        {searchResults.map((user) => (
-                          <UserResult
-                            key={user.displayName}
-                            displayName={user.displayName as string}
-                            project={project}
-                          ></UserResult>
-                        ))}
-                      </div>
+                      <UserSearchResult
+                        searchResults={searchResults}
+                        project={project}
+                      ></UserSearchResult>
                     </div>
                   </div>
                   <SubmitButton sendInvites={sendInvites}></SubmitButton>

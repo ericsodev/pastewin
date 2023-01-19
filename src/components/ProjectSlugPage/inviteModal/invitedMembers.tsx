@@ -1,13 +1,16 @@
 import { XMarkIcon } from "@heroicons/react/20/solid";
 import { useInvites } from "../../../contexts/inviteContext";
 import { InviteDropdown } from "./inviteDropdown";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 export function InvitedMembers(): JSX.Element {
   const { state: invites, dispatch } = useInvites();
+  const [parent] = useAutoAnimate<HTMLDivElement>({ duration: 100 });
+
   return (
     <div>
       <h1 className="mb-2 font-medium text-slate-600">Selected Users</h1>
-      <div className="flex max-h-48 flex-col gap-2">
+      <div className="flex max-h-48 flex-col gap-2" ref={parent}>
         {Object.keys(invites).length === 0 && (
           <span className="self-center text-slate-600">no selected users</span>
         )}
