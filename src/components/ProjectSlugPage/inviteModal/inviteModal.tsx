@@ -16,7 +16,10 @@ interface Props {
   project: Project;
 }
 
-type Project = Pick<RouterOutputs["project"]["overview"], "id" | "editors" | "viewers" | "owner">;
+type Project = Pick<
+  RouterOutputs["project"]["overview"],
+  "id" | "editors" | "viewers" | "owner" | "invitations"
+>;
 
 type SearchResult = RouterOutputs["user"]["findUser"];
 
