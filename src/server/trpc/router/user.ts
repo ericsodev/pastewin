@@ -1,6 +1,7 @@
 import z from "zod";
 import { router, publicProcedure, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
+import type { Prisma } from "@prisma/client";
 
 export const userRouter = router({
   getPublicProfile: publicProcedure
@@ -160,35 +161,30 @@ export const userRouter = router({
     if (!user) throw new TRPCError({ code: "UNAUTHORIZED" });
     return user;
   }),
-  getInvites: protectedProcedure
-    .input(z.object({ userId: z.string() }))
-    .query(async ({ ctx, input }) => {
-      if (ctx.session.user.id !== input.userId) throw new TRPCError({ code: "UNAUTHORIZED" });
-
-      const user = await ctx.prisma.user.findUnique({
-        where: {
-          id: input.userId,
-        },
-        select: {
-          invitations: {
-            select: {
-              projectId: true,
-              userId: true,
-              role: true,
-              project: {
-                select: {
-                  name: true,
-                },
+  getInvites: protectedProcedure.query(async ({ ctx }) => {
+    const invites = await ctx.prisma.invitation.findMany({
+      where: {
+        userId: ctx.session.user.id,
+      },
+      select: {
+        projectId: true,
+        userId: true,
+        role: true,
+        project: {
+          select: {
+            name: true,
+            owner: {
+              select: {
+                displayName: true,
               },
             },
           },
         },
-      });
+      },
+    });
 
-      if (user === null) throw new TRPCError({ code: "NOT_FOUND" });
-
-      return user.invitations;
-    }),
+    return invites;
+  }),
   changeName: protectedProcedure
     .input(z.string().min(1).max(20).trim())
     .mutation(async ({ ctx, input: newName }) => {
@@ -221,11 +217,11 @@ export const userRouter = router({
       // This returns an error since role === "OWNER", and you cannot invite another as an owner.
       if (invite.role === "OWNER") throw new TRPCError({ code: "BAD_REQUEST" });
 
-      let data: any;
+      let data: Prisma.ProjectUpdateInput;
 
       if (invite.role === "VIEWER") {
         data = {
-          viewer: {
+          viewers: {
             connect: {
               id: ctx.session.user.id,
             },
@@ -234,7 +230,7 @@ export const userRouter = router({
       } else {
         // EDITOR
         data = {
-          editor: {
+          editors: {
             connect: {
               id: ctx.session.user.id,
             },
@@ -251,6 +247,8 @@ export const userRouter = router({
           slug: true,
         },
       });
+
+      /** Delete invite after adding user to project */
       await ctx.prisma.invitation.delete({
         where: {
           projectId_userId: {

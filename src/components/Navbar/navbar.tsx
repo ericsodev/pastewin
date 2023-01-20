@@ -2,6 +2,8 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { useToast } from "../../hooks/useToast";
+import { InviteToast } from "../InviteToast";
 import { RegisterModal } from "../NewAccountModal";
 import AccountMenu from "./accountMenu";
 import SettingsMenu from "./settingsMenu";
@@ -22,6 +24,7 @@ export default function Navbar(): JSX.Element {
         "flex w-full items-center justify-center gap-5 bg-gradient-to-b from-slate-400/40 to-transparent px-5 pt-3.5 pb-8 backdrop-blur-xl dark:from-slate-900/70 dark:to-transparent"
       }
     >
+      <InviteToast></InviteToast>
       <RegisterModal open={isRegisterModalOpen} setOpen={setModalOpen}></RegisterModal>
       <Link
         href="/"

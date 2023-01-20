@@ -53,7 +53,7 @@ const DocumentPage: NextPage = () => {
 
   const project = document.project;
   return (
-    <div className="flex h-full flex-col gap-8 p-16 xl:px-36 2xl:px-48">
+    <div className="flex grow flex-col gap-8 p-16 pb-2 xl:px-36 2xl:px-48">
       <Head>
         <title>{document.name} | PasteWin</title>
       </Head>
