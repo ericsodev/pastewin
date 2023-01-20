@@ -37,6 +37,11 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: env.GOOGLE_CLIENT_ID,
       clientSecret: env.GOOGLE_CLIENT_SECRET,
+      authorization: {
+        params: {
+          prompt: "login",
+        },
+      },
     }),
     GithubProvider({
       clientId: env.GITHUB_CLIENT_ID,
@@ -45,7 +50,7 @@ export const authOptions: NextAuthOptions = {
     // ...add more providers here
   ],
   pages: {
-    newUser: "/account/new-user",
+    newUser: "/account/",
   },
 };
 

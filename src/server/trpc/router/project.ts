@@ -107,7 +107,8 @@ export const projectRouter = router({
       });
 
       if (!project) throw new TRPCError({ code: "NOT_FOUND" });
-      if (project.public) return { ...project, role: "VIEWER" };
+      if (project.public && ctx.session?.user?.id === undefined)
+        return { ...project, role: "VIEWER" };
       if (!ctx.session?.user?.id) throw new TRPCError({ code: "UNAUTHORIZED" });
 
       if (project.editors.some((u) => u.id === ctx.session?.user?.id)) {
@@ -238,266 +239,6 @@ export const projectRouter = router({
         throw new TRPCError({ code: "UNAUTHORIZED" });
       return project.pinnedDocument;
     }),
-  // getHead: publicProcedure
-  //   .input(
-  //     z
-  //       .object({ projectId: z.string(), projectSlug: z.string() })
-  //       .partial()
-  //       .refine((d) => !!d.projectId || !!d.projectSlug)
-  //   )
-  //   .query(async ({ ctx, input }) => {
-  //     const project = await ctx.prisma.project.findFirst({
-  //       where: {
-  //         AND: [
-  //           {
-  //             OR: {
-  //               id: input.projectId,
-  //               slug: input.projectSlug,
-  //             },
-  //           },
-  //           {
-  //             OR: {
-  //               public: true,
-  //               viewers: {
-  //                 some: {
-  //                   id: {
-  //                     equals: ctx.session?.user?.id,
-  //                   },
-  //                 },
-  //               },
-  //               editors: {
-  //                 some: {
-  //                   id: {
-  //                     equals: ctx.session?.user?.id,
-  //                   },
-  //                 },
-  //               },
-  //               owner: {
-  //                 id: {
-  //                   equals: ctx.session?.user?.id,
-  //                 },
-  //               },
-  //             },
-  //           },
-  //         ],
-  //       },
-  //       select: {
-  //         id: true,
-  //         slug: true,
-  //         public: true,
-  //         revisions: {
-  //           take: 1,
-  //           orderBy: {
-  //             createdAt: "desc",
-  //           },
-  //           select: {
-  //             id: true,
-  //             slug: true,
-  //             content: true,
-  //             createdAt: true,
-  //           },
-  //         },
-  //         owner: {
-  //           select: {
-  //             id: true,
-  //             displayName: true,
-  //           },
-  //         },
-  //         editors: {
-  //           select: {
-  //             id: true,
-  //             displayName: true,
-  //           },
-  //           orderBy: {
-  //             displayName: "asc",
-  //           },
-  //         },
-  //         viewers: {
-  //           select: {
-  //             id: true,
-  //             displayName: true,
-  //           },
-  //           orderBy: {
-  //             displayName: "asc",
-  //           },
-  //         },
-  //       },
-  //     });
-
-  //     if (!project) throw new TRPCError({ code: "NOT_FOUND" });
-  //     if (!project.public && !ctx.session?.user?.id) throw new TRPCError({ code: "UNAUTHORIZED" });
-
-  //     if (project.editors.some((u) => u.id !== ctx.session?.user?.id)) {
-  //       throw new TRPCError({ code: "UNAUTHORIZED" });
-  //     }
-
-  //     if (project.viewers.some((u) => u.id !== ctx.session?.user?.id)) {
-  //       throw new TRPCError({ code: "UNAUTHORIZED" });
-  //     }
-
-  //     if (project.owner.id !== ctx.session?.user?.id) {
-  //       throw new TRPCError({ code: "UNAUTHORIZED" });
-  //     }
-
-  //     return project.revisions[0] ?? null;
-  //   }),
-  // revertHead: protectedProcedure
-  //   .input(z.object({ projectId: z.string(), documentId: z.string() }))
-  //   .mutation(async ({ ctx, input }) => {
-  //     const project = await ctx.prisma.project.findFirst({
-  //       where: {
-  //         id: input.projectId,
-  //         revisions: {
-  //           some: {
-  //             id: {
-  //               equals: input.documentId,
-  //             },
-  //           },
-  //         },
-  //       },
-  //       select: {
-  //         owner: { select: { id: true } },
-  //         revisions: {
-  //           orderBy: {
-  //             createdAt: "asc",
-  //           },
-  //         },
-  //       },
-  //     });
-  //     if (!project) throw new TRPCError({ code: "NOT_FOUND" });
-  //     if (project.owner.id !== ctx.session.user.id) throw new TRPCError({ code: "UNAUTHORIZED" });
-
-  //     const removedRevisions: string[] = [];
-  //     let remove = true;
-  //     project.revisions.forEach((v) => {
-  //       if (v.id === input.documentId) {
-  //         remove = false;
-  //         return;
-  //       }
-  //       if (remove) removedRevisions.push(v.id);
-  //     });
-
-  //     await ctx.prisma.project.update({
-  //       where: {
-  //         id: input.projectId,
-  //       },
-  //       data: {
-  //         revisions: {
-  //           deleteMany: {
-  //             id: {
-  //               in: removedRevisions,
-  //             },
-  //           },
-  //         },
-  //       },
-  //     });
-  //   }),
-  // publishHead: protectedProcedure
-  //   .input(z.object({ projectId: z.string() }))
-  //   .mutation(async ({ ctx, input }) => {
-  //     const project = await ctx.prisma.project.findUnique({
-  //       where: {
-  //         id: input.projectId,
-  //       },
-  //       select: {
-  //         owner: {
-  //           select: {
-  //             id: true,
-  //           },
-  //         },
-  //         revisions: {
-  //           orderBy: {
-  //             createdAt: "desc",
-  //           },
-  //           take: 1,
-  //           select: {
-  //             content: true,
-  //           },
-  //         },
-  //       },
-  //     });
-  //     if (!project) throw new TRPCError({ code: "NOT_FOUND" });
-  //     if (project.owner.id !== ctx.session.user.id) throw new TRPCError({ code: "UNAUTHORIZED" });
-
-  //     await ctx.prisma.project.update({
-  //       where: {
-  //         id: input.projectId,
-  //       },
-  //       data: {
-  //         revisions: {
-  //           create: {
-  //             content: project.revisions[0]?.content ?? "",
-  //           },
-  //         },
-  //       },
-  //     });
-  //   }),
-  // published: protectedProcedure
-  //   .input(z.object({ projectId: z.string(), documentId: z.string() }))
-  //   .mutation(async ({ ctx, input }) => {
-  //     const project = await ctx.prisma.project.findFirst({
-  //       where: {
-  //         id: input.projectId,
-  //         revisions: {
-  //           some: {
-  //             id: {
-  //               equals: input.documentId,
-  //             },
-  //           },
-  //         },
-  //       },
-  //       select: {
-  //         owner: {
-  //           select: {
-  //             id: true,
-  //           },
-  //         },
-  //       },
-  //     });
-  //     if (!project) throw new TRPCError({ code: "NOT_FOUND" });
-  //     if (project.owner.id !== ctx.session.user.id) throw new TRPCError({ code: "UNAUTHORIZED" });
-
-  //     await ctx.prisma.$transaction([
-  //       ctx.prisma.project.update({
-  //         where: {
-  //           id: input.projectId,
-  //         },
-  //         data: {
-  //           revisions: {
-  //             updateMany: {
-  //               where: {
-  //                 id: {
-  //                   not: input.documentId,
-  //                 },
-  //               },
-  //               data: {
-  //                 published: false,
-  //               },
-  //             },
-  //           },
-  //         },
-  //       }),
-  //       ctx.prisma.project.update({
-  //         where: {
-  //           id: input.projectId,
-  //         },
-  //         data: {
-  //           revisions: {
-  //             updateMany: {
-  //               where: {
-  //                 id: {
-  //                   equals: input.documentId,
-  //                 },
-  //               },
-  //               data: {
-  //                 published: true,
-  //               },
-  //             },
-  //           },
-  //         },
-  //       }),
-  //     ]);
-  //   }),
   renameProject: protectedProcedure
     .input(z.object({ projectId: z.string(), newName: z.string().min(1).max(35) }))
     .mutation(async ({ ctx, input }) => {
@@ -575,11 +316,20 @@ export const projectRouter = router({
     }),
   invite: protectedProcedure
     .input(
-      z.object({
-        projectId: z.string(),
-        displayName: z.string(),
-        role: z.enum(["EDITOR", "VIEWER"]),
-      })
+      z
+        .object({
+          projectId: z.string(),
+          invitees: z.array(
+            z.object({
+              displayName: z.string(),
+              role: z.enum(["VIEWER", "EDITOR"]),
+            })
+          ),
+        })
+        .refine((z) => {
+          const names = z.invitees.map((x) => x.displayName);
+          return new Set(names).size === names.length;
+        }, "Duplicate invitees")
     )
     .mutation(async ({ ctx, input }) => {
       const project = await ctx.prisma.project.findUnique({
@@ -597,34 +347,64 @@ export const projectRouter = router({
       if (!project) throw new TRPCError({ code: "NOT_FOUND" });
       if (project.owner.id !== ctx.session.user.id) throw new TRPCError({ code: "UNAUTHORIZED" });
 
-      if (input.role === "EDITOR") {
-        await ctx.prisma.project.update({
-          where: {
-            id: input.projectId,
-          },
-          data: {
-            editors: {
-              connect: {
-                displayName: input.displayName,
-              },
-            },
-          },
+      const newEditors = input.invitees
+        .filter((x) => x.role === "EDITOR")
+        .map((x) => {
+          return { displayName: x.displayName };
         });
-      }
-      if (input.role === "VIEWER") {
-        await ctx.prisma.project.update({
-          where: {
-            id: input.projectId,
-          },
-          data: {
-            viewers: {
-              connect: {
-                displayName: input.displayName,
-              },
-            },
-          },
+      const newViewers = input.invitees
+        .filter((x) => x.role === "VIEWER")
+        .map((x) => {
+          return { displayName: x.displayName };
         });
-      }
+
+      /**
+       * Connect project editors and viewers by displayName
+       * Disconnect any promoted/demoted users (e.g. used to be viewer, now editor)
+       */
+      await ctx.prisma.project.update({
+        where: {
+          id: input.projectId,
+        },
+        data: {
+          editors: {
+            connect: newEditors,
+            disconnect: newViewers,
+          },
+          viewers: {
+            connect: newViewers,
+            disconnect: newEditors,
+          },
+        },
+      });
+      // if (input.role === "EDITOR") {
+      //   await ctx.prisma.project.update({
+      //     where: {
+      //       id: input.projectId,
+      //     },
+      //     data: {
+      //       editors: {
+      //         connect: {
+      //           displayName: input.displayName,
+      //         },
+      //       },
+      //     },
+      //   });
+      // }
+      // if (input.role === "VIEWER") {
+      //   await ctx.prisma.project.update({
+      //     where: {
+      //       id: input.projectId,
+      //     },
+      //     data: {
+      //       viewers: {
+      //         connect: {
+      //           displayName: input.displayName,
+      //         },
+      //       },
+      //     },
+      //   });
+      // }
     }),
   uninvite: protectedProcedure
     .input(z.object({ projectId: z.string(), displayName: z.string() }))

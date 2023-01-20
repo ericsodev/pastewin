@@ -114,6 +114,11 @@ export const userRouter = router({
                 displayName: true,
               },
             },
+            _count: {
+              select: {
+                documents: true,
+              },
+            },
           },
         },
         editableProjects: {
@@ -126,6 +131,11 @@ export const userRouter = router({
                 displayName: true,
               },
             },
+            _count: {
+              select: {
+                documents: true,
+              },
+            },
           },
         },
         viewableProjects: {
@@ -136,6 +146,11 @@ export const userRouter = router({
             owner: {
               select: {
                 displayName: true,
+              },
+            },
+            _count: {
+              select: {
+                documents: true,
               },
             },
           },
@@ -280,5 +295,20 @@ export const userRouter = router({
         },
       });
       return !!user;
+    }),
+  findUser: protectedProcedure
+    .input(z.string().min(1).max(20))
+    .query(async ({ ctx, input: name }) => {
+      return await ctx.prisma.user.findMany({
+        where: {
+          displayName: {
+            startsWith: name,
+          },
+        },
+        select: {
+          displayName: true,
+        },
+        take: 10,
+      });
     }),
 });

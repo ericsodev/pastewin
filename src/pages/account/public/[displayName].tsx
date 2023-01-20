@@ -1,17 +1,12 @@
-import type { NextPage } from "next";
-import { useRouter } from "next/router";
-import { trpc } from "../../../utils/trpc";
-import { Error } from "../../../components/error";
-import { Loading } from "../../../components/loading";
-import Link from "next/link";
-import { EditableProjectCards } from "../../../components/ProfilePage/editableProjects";
-import { OwnedProjectCards } from "../../../components/ProfilePage/ownedProjects";
 import { Disclosure } from "@headlessui/react";
 import { ChevronUpIcon } from "@heroicons/react/20/solid";
-
-const gridSizingClasses = `lg:grid-cols-[repeat(auto-fill,minmax(16rem,1fr))]
-  2xl:grid-cols-[repeat(auto-fill,minmax(18rem,1fr))]
-  4xl:grid-cols-[repeat(auto-fill,minmax(20rem,1fr))]`;
+import type { NextPage } from "next";
+import { useRouter } from "next/router";
+import { Error } from "../../../components/error";
+import { Loading } from "../../../components/loading";
+import { EditableProjectCards } from "../../../components/ProfilePage/editableProjects";
+import { OwnedProjectCards } from "../../../components/ProfilePage/ownedProjects";
+import { trpc } from "../../../utils/trpc";
 
 const PublicAccountPage: NextPage = (req, res) => {
   const router = useRouter();

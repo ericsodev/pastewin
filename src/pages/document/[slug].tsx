@@ -3,6 +3,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { TitleHeader } from "../../components/DocumentSlugPage/titleHeader";
 import { Error } from "../../components/error";
 import { Loading } from "../../components/loading";
 import { trpc } from "../../utils/trpc";
@@ -47,7 +48,9 @@ const DocumentPage: NextPage = () => {
   if (error?.data?.code === "NOT_FOUND") return <Error>Document not found.</Error>;
   if (isError) return <Error></Error>;
   if (isLoading) return <Loading></Loading>;
-  console.log(document.role);
+
+  const isDocumentInProject = !!document.project?.id;
+
   const project = document.project;
   return (
     <div className="flex h-full flex-col gap-8 p-16 xl:px-36 2xl:px-48">
@@ -55,7 +58,7 @@ const DocumentPage: NextPage = () => {
         <title>{document.name} | PasteWin</title>
       </Head>
       <div>
-        <h1 className="text-4xl font-semibold text-slate-800 dark:text-slate-100">
+        {/* <h1 className="text-4xl font-semibold text-slate-800 dark:text-slate-100">
           {document.name}{" "}
           {project && (
             <span className="text-2xl font-normal text-slate-400">
@@ -66,8 +69,8 @@ const DocumentPage: NextPage = () => {
               </Link>
             </span>
           )}
-        </h1>
-        {project && (
+        </h1> */}
+        {/* {project && (
           <h2 className="mb-4 text-lg text-slate-600 dark:text-slate-400">
             from
             <Link
@@ -78,7 +81,8 @@ const DocumentPage: NextPage = () => {
               {project.name}
             </Link>
           </h2>
-        )}
+        )} */}
+        <TitleHeader document={document} refetch={refetch}></TitleHeader>
       </div>
       <div className="relative flex grow flex-col gap-2 py-2">
         {documentMutate.isLoading && (
