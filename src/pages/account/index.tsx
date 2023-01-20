@@ -85,7 +85,7 @@ const AccountPage: NextPage = (req, res) => {
             </Disclosure.Button>
             <Disclosure.Panel>
               <EditableProjectCards
-                editableProjects={profile.editableProjects}
+                editableProjects={profile.viewableProjects}
               ></EditableProjectCards>
             </Disclosure.Panel>
           </>

@@ -1,7 +1,6 @@
+import { SessionProvider } from "next-auth/react";
 import Head from "next/head";
 import Navbar from "./Navbar";
-import { SessionProvider } from "next-auth/react";
-import { trpc } from "../utils/trpc";
 
 type LayoutProps = {
   children: React.ReactNode;

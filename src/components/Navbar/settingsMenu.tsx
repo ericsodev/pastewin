@@ -4,7 +4,7 @@ import { useDarkMode } from "usehooks-ts";
 import { useEffect } from "react";
 
 export default function SettingsMenu(): JSX.Element {
-  const { isDarkMode, toggle, enable, disable } = useDarkMode();
+  const { isDarkMode, toggle } = useDarkMode();
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add("dark");

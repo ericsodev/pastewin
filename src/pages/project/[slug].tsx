@@ -28,6 +28,8 @@ const ProjectPage: NextPage = () => {
     { projectSlug: slug as string },
     {
       enabled: typeof slug === "string",
+      retry: false,
+      retryOnMount: false,
     }
   );
   const [documentModalOpen, setDocumentModalOpen] = useState<boolean>(false);
@@ -81,13 +83,15 @@ const ProjectPage: NextPage = () => {
               </div>
             </Link>
           ))}
-          <div
-            tabIndex={0}
-            onClick={() => setDocumentModalOpen(true)}
-            className="group flex cursor-pointer items-center justify-center gap-10 rounded-md border-[2px] border-white/50 bg-gradient-to-br from-white/40 to-white/10 px-8 py-6 hover:border-white/30 hover:from-white/30 dark:border-gray-800 dark:from-gray-900 dark:to-gray-800/50 dark:hover:border-violet-500/40"
-          >
-            <PlusIcon className="h-9 w-9 transform text-slate-700 transition-transform duration-75 group-hover:scale-110 group-focus:scale-90"></PlusIcon>
-          </div>
+          {project.role === "OWNER" && (
+            <div
+              tabIndex={0}
+              onClick={() => setDocumentModalOpen(true)}
+              className="group flex cursor-pointer items-center justify-center gap-10 rounded-md border-[2px] border-white/50 bg-gradient-to-br from-white/40 to-white/10 px-8 py-6 hover:border-white/30 hover:from-white/30 dark:border-gray-800 dark:from-gray-900 dark:to-gray-800/50 dark:hover:border-violet-500/40"
+            >
+              <PlusIcon className="h-9 w-9 transform text-slate-700 transition-transform duration-75 group-hover:scale-110 group-focus:scale-90"></PlusIcon>
+            </div>
+          )}
         </div>
       </div>
       <NewDocumentModal
