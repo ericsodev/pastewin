@@ -103,6 +103,16 @@ export const projectRouter = router({
               displayName: "asc",
             },
           },
+          invitations: {
+            select: {
+              user: {
+                select: {
+                  displayName: true,
+                },
+              },
+              role: true,
+            },
+          },
         },
       });
 
@@ -322,7 +332,7 @@ export const projectRouter = router({
           invitees: z.array(
             z.object({
               displayName: z.string(),
-              role: z.enum(["VIEWER", "EDITOR"]),
+              role: z.enum(["VIEWER", "EDITOR", "NONE"]),
             })
           ),
         })
@@ -342,69 +352,139 @@ export const projectRouter = router({
               id: true,
             },
           },
+          editors: {
+            select: {
+              displayName: true,
+            },
+          },
+          viewers: {
+            select: {
+              displayName: true,
+            },
+          },
         },
       });
       if (!project) throw new TRPCError({ code: "NOT_FOUND" });
       if (project.owner.id !== ctx.session.user.id) throw new TRPCError({ code: "UNAUTHORIZED" });
 
-      const newEditors = input.invitees
-        .filter((x) => x.role === "EDITOR")
-        .map((x) => {
-          return { displayName: x.displayName };
-        });
-      const newViewers = input.invitees
-        .filter((x) => x.role === "VIEWER")
-        .map((x) => {
-          return { displayName: x.displayName };
-        });
+      const projectViewers = new Set(project.viewers.map((x) => x.displayName as string));
+      const projectEditors = new Set(project.editors.map((x) => x.displayName as string));
+
+      type Members = {
+        displayName: string;
+      }[];
+      const existingViewerPromotions: Members = [];
+      const existingEditorDemotions: Members = [];
+      const newEditors: string[] = [];
+      const newViewers: string[] = [];
+      const existingMemberRemoval: Members = [];
+
+      input.invitees.forEach((x) => {
+        if (x.role === "VIEWER") {
+          if (projectEditors.has(x.displayName))
+            existingEditorDemotions.push({ displayName: x.displayName });
+          else newViewers.push(x.displayName);
+        } else if (x.role === "EDITOR") {
+          if (projectViewers.has(x.displayName))
+            existingViewerPromotions.push({ displayName: x.displayName });
+          else newEditors.push(x.displayName);
+        } else {
+          if (projectViewers.has(x.displayName) || projectEditors.has(x.displayName))
+            existingMemberRemoval.push({ displayName: x.displayName });
+        }
+      });
+      const [newEditorIds, newViewerIds] = await ctx.prisma.$transaction([
+        ctx.prisma.user.findMany({
+          where: {
+            displayName: {
+              in: newEditors,
+            },
+          },
+          select: {
+            id: true,
+          },
+        }),
+        ctx.prisma.user.findMany({
+          where: {
+            displayName: {
+              in: newViewers,
+            },
+          },
+          select: {
+            id: true,
+          },
+        }),
+      ]);
 
       /**
-       * Connect project editors and viewers by displayName
+       * Connect existing project editors and viewers by displayName
        * Disconnect any promoted/demoted users (e.g. used to be viewer, now editor)
+       *
+       * Create invites for new editors/viewers
        */
+      type Role = "EDITOR" | "VIEWER";
       await ctx.prisma.project.update({
         where: {
           id: input.projectId,
         },
         data: {
           editors: {
-            connect: newEditors,
-            disconnect: newViewers,
+            connect: existingViewerPromotions,
+            disconnect: [...existingEditorDemotions, ...existingMemberRemoval],
           },
           viewers: {
-            connect: newViewers,
-            disconnect: newEditors,
+            connect: existingEditorDemotions,
+            disconnect: [...existingViewerPromotions, ...existingMemberRemoval],
+          },
+          invitations: {
+            upsert: [
+              ...newEditorIds.map((user) => {
+                return {
+                  where: {
+                    projectId_userId: {
+                      userId: user.id,
+                      projectId: input.projectId,
+                    },
+                  },
+                  create: {
+                    role: "EDITOR" as Role,
+                    user: {
+                      connect: {
+                        id: user.id,
+                      },
+                    },
+                  },
+                  update: {
+                    role: "EDITOR" as Role,
+                  },
+                };
+              }),
+
+              ...newViewerIds.map((user) => {
+                return {
+                  where: {
+                    projectId_userId: {
+                      userId: user.id,
+                      projectId: input.projectId,
+                    },
+                  },
+                  create: {
+                    role: "VIEWER" as Role,
+                    user: {
+                      connect: {
+                        id: user.id,
+                      },
+                    },
+                  },
+                  update: {
+                    role: "VIEWER" as Role,
+                  },
+                };
+              }),
+            ],
           },
         },
       });
-      // if (input.role === "EDITOR") {
-      //   await ctx.prisma.project.update({
-      //     where: {
-      //       id: input.projectId,
-      //     },
-      //     data: {
-      //       editors: {
-      //         connect: {
-      //           displayName: input.displayName,
-      //         },
-      //       },
-      //     },
-      //   });
-      // }
-      // if (input.role === "VIEWER") {
-      //   await ctx.prisma.project.update({
-      //     where: {
-      //       id: input.projectId,
-      //     },
-      //     data: {
-      //       viewers: {
-      //         connect: {
-      //           displayName: input.displayName,
-      //         },
-      //       },
-      //     },
-      //   });
-      // }
     }),
   uninvite: protectedProcedure
     .input(z.object({ projectId: z.string(), displayName: z.string() }))
