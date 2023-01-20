@@ -160,35 +160,31 @@ export const userRouter = router({
     if (!user) throw new TRPCError({ code: "UNAUTHORIZED" });
     return user;
   }),
-  getInvites: protectedProcedure
-    .input(z.object({ userId: z.string() }))
-    .query(async ({ ctx, input }) => {
-      if (ctx.session.user.id !== input.userId) throw new TRPCError({ code: "UNAUTHORIZED" });
-
-      const user = await ctx.prisma.user.findUnique({
-        where: {
-          id: input.userId,
-        },
-        select: {
-          invitations: {
-            select: {
-              projectId: true,
-              userId: true,
-              role: true,
-              project: {
-                select: {
-                  name: true,
-                },
+  getInvites: protectedProcedure.query(async ({ ctx }) => {
+    const user = await ctx.prisma.user.findUnique({
+      where: {
+        id: ctx.session.user.id,
+      },
+      select: {
+        invitations: {
+          select: {
+            projectId: true,
+            userId: true,
+            role: true,
+            project: {
+              select: {
+                name: true,
               },
             },
           },
         },
-      });
+      },
+    });
 
-      if (user === null) throw new TRPCError({ code: "NOT_FOUND" });
+    if (user === null) throw new TRPCError({ code: "NOT_FOUND" });
 
-      return user.invitations;
-    }),
+    return user.invitations;
+  }),
   changeName: protectedProcedure
     .input(z.string().min(1).max(20).trim())
     .mutation(async ({ ctx, input: newName }) => {

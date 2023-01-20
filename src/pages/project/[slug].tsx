@@ -74,10 +74,10 @@ const ProjectPage: NextPage = () => {
                   {v.name}
                 </h2>
 
-                <p className="max-w-xs text-slate-600 dark:text-slate-400">
+                <p className="mt-auto max-w-xs text-slate-600 dark:text-slate-400">
                   created on{" "}
                   <strong className="font-semibold">
-                    {dayjs(v.createdAt).format("MMM D YYYY")}
+                    {dayjs(v.createdAt).format("MMM D, YYYY")}
                   </strong>
                 </p>
               </div>

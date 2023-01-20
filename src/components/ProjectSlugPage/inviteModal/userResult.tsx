@@ -3,8 +3,11 @@ import { useInvites } from "../../../contexts/inviteContext";
 import type { RouterOutputs } from "../../../utils/trpc";
 import { RoleBadge } from "./roleBadge";
 
-type Project = Pick<RouterOutputs["project"]["overview"], "id" | "editors" | "viewers" | "owner">;
-type Role = "NONE" | "VIEWER" | "EDITOR" | "OWNER";
+type Project = Pick<
+  RouterOutputs["project"]["overview"],
+  "id" | "editors" | "viewers" | "owner" | "invitations"
+>;
+type Role = "NONE" | "VIEWER" | "EDITOR" | "OWNER" | "INVITED";
 
 interface Props {
   displayName: string;
@@ -53,5 +56,6 @@ function getRole(displayName: string | null, project: Project): Role {
   if (displayName === project.owner.displayName) return "OWNER";
   if (project.editors.some((v) => v.displayName === displayName)) return "EDITOR";
   if (project.viewers.some((v) => v.displayName === displayName)) return "VIEWER";
+  if (project.invitations.some((v) => v.user.displayName === displayName)) return "INVITED";
   return "NONE";
 }

@@ -1,14 +1,15 @@
 import { Menu } from "@headlessui/react";
 import { ArrowLeftCircleIcon, UserCircleIcon } from "@heroicons/react/24/solid";
-import { signIn, signOut } from "next-auth/react";
+import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { trpc } from "../../utils/trpc";
 
 export default function AccountMenu(): JSX.Element {
-  const { data: session } = trpc.auth.getSession.useQuery();
+  const { data: session, status } = useSession();
 
-  if (!session)
+  if (status === "loading") return <></>;
+  if (status === "unauthenticated" || !session)
     return (
       <button
         onClick={() => signIn()}
@@ -17,6 +18,7 @@ export default function AccountMenu(): JSX.Element {
         Sign in
       </button>
     );
+
   return (
     <Menu as="div" className="relative">
       <Menu.Button className="rounded-md border-solid border-white">
@@ -46,12 +48,12 @@ export default function AccountMenu(): JSX.Element {
             )}
           </Menu.Item>
         </div>
-        <div className="px-0.5 py-0.5">
+        <div className="w-full px-0.5 py-0.5">
           <Menu.Item>
             {({ active }) => (
               <button
                 onClick={() => signOut()}
-                className="inline-flex w-max items-center justify-start gap-1.5 rounded-md p-2 hover:bg-slate-200 hover:bg-opacity-70"
+                className="inline-flex w-full items-center justify-start gap-1.5 rounded-md p-2 hover:bg-slate-200 hover:bg-opacity-70"
               >
                 <ArrowLeftCircleIcon className="h-5 w-5"></ArrowLeftCircleIcon>
                 Logout
