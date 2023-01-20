@@ -1,21 +1,23 @@
 import { useState } from "react";
 import { Toast } from "../components/Toast/toast";
 
-interface Props extends React.PropsWithChildren {
+interface Props {
   timeOpen?: number;
   position?: "tr" | "tl";
 }
-export function useToast({ timeOpen = 1000, position, children }: Props) {
-  const [isOpen, setOpen] = useState<boolean>(true);
+export function useToast({ timeOpen = 2000, position }: Props) {
+  const [isOpen, setOpen] = useState<boolean>(false);
 
-  const toast = (
-    <Toast isOpen={isOpen} close={() => setOpen(false)} position={position}>
+  const ToastWrapper = ({ children }: React.PropsWithChildren) => (
+    <Toast isOpen={isOpen} position={position}>
       {children}
     </Toast>
   );
   const showToast = () => {
     setOpen(true);
-    setTimeout(() => setOpen(false), timeOpen);
+    //   setTimeout(() => {
+    //     setOpen(false);
+    //   }, timeOpen);
   };
-  return { toast, showToast };
+  return { Toast: ToastWrapper, showToast, closeToast: () => setOpen(false) };
 }
