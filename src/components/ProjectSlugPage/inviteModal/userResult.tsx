@@ -20,16 +20,16 @@ export function UserResult({ displayName, project }: Props): JSX.Element {
   return (
     <div
       key={displayName}
-      className="flex flex-row items-center justify-between rounded-md bg-slate-50 py-1.5 pl-5 pr-3"
+      className="flex flex-row items-center justify-between rounded-md bg-slate-50 py-1.5 pl-5 pr-3 dark:bg-ch-gray-700"
     >
-      <h1 className="font-medium text-slate-600">{displayName}</h1>
+      <h1 className="font-medium text-slate-600 dark:text-gray-300">{displayName}</h1>
       <div className="flex items-stretch gap-2">
         <RoleBadge role={role}></RoleBadge>
         <button
           onClick={() => {
             dispatchInvite({ type: "ADD", payload: { displayName: displayName, role: "VIEWER" } });
           }}
-          className="flex w-24 items-center justify-start rounded-lg bg-emerald-200 py-1 px-3 text-green-800 disabled:bg-emerald-700/10 disabled:text-green-700/60"
+          className="flex w-24 items-center justify-start rounded-lg bg-emerald-200 py-1 px-3 text-green-800 disabled:bg-emerald-700/10 disabled:text-green-700/60 dark:disabled:bg-emerald-700/50 dark:disabled:text-green-600"
           disabled={role === "OWNER" || displayName in invites}
         >
           {displayName in invites ? (

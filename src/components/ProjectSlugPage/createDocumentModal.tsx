@@ -52,8 +52,11 @@ export function NewDocumentModal({ open, setOpen, refresh, projectId }: Props): 
               {createDocument.isLoading ? (
                 <Loading></Loading>
               ) : (
-                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-lg bg-white p-6 text-left align-middle shadow-xl transition-all">
-                  <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
+                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-lg bg-slate-50 p-6 text-left align-middle shadow-xl transition-all dark:bg-ch-gray-800">
+                  <Dialog.Title
+                    as="h3"
+                    className="text-lg font-medium leading-6 text-gray-900 dark:text-gray-200"
+                  >
                     New Document
                   </Dialog.Title>
                   <Formik
@@ -63,12 +66,14 @@ export function NewDocumentModal({ open, setOpen, refresh, projectId }: Props): 
                   >
                     {({ errors }) => (
                       <Form>
-                        <div className="mt-4 flex flex-col gap-2">
-                          <label className="text-sm text-gray-600">Document Name</label>
+                        <div className="mt-4 flex flex-col gap-2.5">
+                          <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                            Document Name
+                          </label>
                           <Field
                             name="documentName"
                             placeholder="new document"
-                            className="rounded-md py-1 px-2 text-gray-600 ring-2 ring-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2"
+                            className="rounded-md bg-slate-200/80 py-1 px-2 text-gray-600 outline-none focus:outline-2 focus:outline-offset-1 focus:outline-violet-400 dark:bg-ch-gray-600 dark:text-slate-200"
                           ></Field>
                           <label className="text-sm font-medium text-red-400">
                             {errors.documentName}

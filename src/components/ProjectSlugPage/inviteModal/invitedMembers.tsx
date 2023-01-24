@@ -9,17 +9,17 @@ export function InvitedMembers(): JSX.Element {
 
   return (
     <div>
-      <h1 className="mb-2 font-medium text-slate-600">Selected Users</h1>
+      <h1 className="mb-2 font-medium text-slate-600 dark:text-gray-400">Selected Users</h1>
       <div className="flex max-h-48 flex-col gap-2" ref={parent}>
         {Object.keys(invites).length === 0 && (
-          <span className="self-center text-slate-600">no selected users</span>
+          <span className="self-center text-slate-600 dark:text-gray-400">no selected users</span>
         )}
         {Object.entries(invites).map(([displayName, role]) => (
           <div
             key={displayName}
-            className="flex flex-row items-center justify-between rounded-md bg-slate-50 py-1.5 px-6 pr-3"
+            className="flex flex-row items-center justify-between rounded-md bg-slate-50 py-1.5 px-6 pr-3 dark:bg-ch-gray-700"
           >
-            <h1 className="font-medium text-slate-600">{displayName}</h1>
+            <h1 className="font-medium text-slate-600 dark:text-gray-300">{displayName}</h1>
             <div className="flex items-center gap-2">
               <InviteDropdown displayName={displayName} currentRole={role}></InviteDropdown>
               <XMarkIcon

@@ -79,8 +79,11 @@ export function InviteModal({ open, setOpen, project, refresh }: Props): JSX.Ele
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-lg transform overflow-hidden rounded-lg bg-white p-6 text-left align-middle shadow-xl transition-all">
-                <Dialog.Title as="h3" className="mb-4 text-lg font-medium leading-6 text-gray-900">
+              <Dialog.Panel className="w-full max-w-lg transform overflow-hidden rounded-lg bg-slate-50 p-6 text-left align-middle shadow-xl transition-all dark:bg-ch-gray-800">
+                <Dialog.Title
+                  as="h3"
+                  className="mb-4 text-lg font-medium leading-6 text-gray-900 dark:text-gray-200"
+                >
                   Invite Members
                 </Dialog.Title>
                 <InviteProvider>
@@ -88,7 +91,7 @@ export function InviteModal({ open, setOpen, project, refresh }: Props): JSX.Ele
                     <InvitedMembers></InvitedMembers>
                     <div>
                       <input
-                        className="rounded-md bg-slate-100 py-1 px-3  text-slate-800"
+                        className="rounded-md bg-slate-200/80 py-1 px-3 text-slate-800 dark:bg-ch-gray-600 dark:text-slate-200"
                         placeholder="search users"
                         onChange={async (e) => {
                           setInput(e.target.value);
@@ -96,7 +99,7 @@ export function InviteModal({ open, setOpen, project, refresh }: Props): JSX.Ele
                       ></input>
                     </div>
                     <div className="h-64 overflow-y-scroll">
-                      <h1 className="font-medium text-slate-600">
+                      <h1 className="font-medium text-slate-600 dark:text-slate-200">
                         {searchResults.length} {searchResults.length === 1 ? "result" : "results"}
                       </h1>
                       <UserSearchResult
