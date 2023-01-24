@@ -22,19 +22,19 @@ export function InviteDropdown({ displayName, currentRole }: Props): JSX.Element
   return (
     <div className="relative">
       <Listbox value={selectedRole} onChange={setSelectedRole}>
-        <Listbox.Button className="relative flex w-28 items-center justify-between rounded-md bg-slate-200 px-3 py-1 text-slate-700">
+        <Listbox.Button className="relative flex w-28 items-center justify-between rounded-md bg-slate-200 px-3 py-1 text-slate-700 dark:bg-ch-gray-600 dark:text-gray-300">
           <span>{selectedRole.toLowerCase()}</span>
           <span>
             <ChevronUpDownIcon className="h-5 w-5"></ChevronUpDownIcon>
           </span>
         </Listbox.Button>
-        <Listbox.Options className="absolute z-10 mt-1 w-full overflow-clip rounded-md bg-slate-100 py-1 shadow-lg ring-1 ring-black ring-opacity-10">
+        <Listbox.Options className="absolute z-10 mt-1 w-full overflow-clip rounded-md bg-slate-100 py-1 shadow-lg ring-1 ring-black ring-opacity-10 dark:bg-ch-gray-800">
           {SelectableRoles.map((role: SelectableRole) => (
             <Listbox.Option
               key={role}
               value={role}
               disabled={currentRole === role}
-              className="flex cursor-default   bg-slate-50 px-2 py-1.5  text-sm text-slate-800 hover:bg-violet-200/80 hover:text-violet-800"
+              className="cursor-defaul flex px-2 py-1.5 text-sm text-slate-800  hover:bg-violet-200/80 hover:text-violet-800 dark:text-gray-300 dark:hover:text-violet-500"
             >
               {({ selected }) => (
                 <>
