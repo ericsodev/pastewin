@@ -368,11 +368,12 @@ export const documentRouter = router({
      * Returns
      * - Slug of the created document
      */
-    .input(z.object({ name: z.string().min(1).max(35), content: z.string() }))
+    .input(z.object({ name: z.string().min(1).max(35), content: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
       return await ctx.prisma.document.create({
         data: {
           name: input.name,
+          discoverable: true,
           content: input.content,
           viewOnly: true,
         },

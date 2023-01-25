@@ -1,8 +1,7 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { TitleHeader } from "../../components/DocumentSlugPage/titleHeader";
 import { Error } from "../../components/error";
 import { Loading } from "../../components/loading";
@@ -49,39 +48,12 @@ const DocumentPage: NextPage = () => {
   if (isError) return <Error></Error>;
   if (isLoading) return <Loading></Loading>;
 
-  const isDocumentInProject = !!document.project?.id;
-
-  const project = document.project;
   return (
     <div className="flex grow flex-col gap-8 p-16 pb-2 xl:px-36 2xl:px-48">
       <Head>
         <title>{document.name} | PasteWin</title>
       </Head>
       <div>
-        {/* <h1 className="text-4xl font-semibold text-slate-800 dark:text-slate-100">
-          {document.name}{" "}
-          {project && (
-            <span className="text-2xl font-normal text-slate-400">
-              {" "}
-              by{" "}
-              <Link href={`/account/public/${project.owner.displayName}`} className="font-medium">
-                {project.owner.displayName}
-              </Link>
-            </span>
-          )}
-        </h1> */}
-        {/* {project && (
-          <h2 className="mb-4 text-lg text-slate-600 dark:text-slate-400">
-            from
-            <Link
-              href={`/project/${project.slug}`}
-              className="font-medium text-slate-700 dark:text-slate-300"
-            >
-              {" "}
-              {project.name}
-            </Link>
-          </h2>
-        )} */}
         <TitleHeader document={document} refetch={refetch}></TitleHeader>
       </div>
       <div className="relative flex grow flex-col gap-2 py-2">
@@ -91,7 +63,7 @@ const DocumentPage: NextPage = () => {
           </div>
         )}
         <textarea
-          contentEditable={["EDITOR", "OWNER"].includes(document.role) && !document.viewOnly}
+          readOnly={document.viewOnly || !["EDITOR", "OWNER"].includes(document.role)}
           className={`grow basis-96 resize-none rounded-md bg-ch-gray-50 px-6 py-4 outline-none ring-2 ring-gray-400 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 dark:bg-ch-gray-700 dark:focus:ring-violet-500 ${
             documentMutate.isLoading
               ? "border-emerald-200 bg-ch-gray-200/90 ring-4 ring-emerald-200 dark:bg-ch-gray-800/70"
