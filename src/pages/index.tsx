@@ -4,7 +4,10 @@ import Link from "next/link";
 export default function Home() {
   return (
     <div className="flex grow items-center justify-center">
-      <div className="md:1/2 relative flex w-2/3 flex-col justify-center gap-4 lg:w-1/3">
+      <div className="md:1/2 relative flex w-2/3 flex-col justify-center lg:w-1/3">
+        <div className="absolute inset-x-5 inset-y-10 -z-10 opacity-50 blur-3xl dark:bg-indigo-400">
+          f
+        </div>
         <h1 className="after:content-[' '] relative m-0 w-max text-center text-6xl  font-bold text-slate-700 after:inset-0 after:bg-red-300 dark:text-violet-50 md:text-6xl lg:text-6xl xl:text-7xl">
           share your{" "}
           <strong className="font-extrabold text-indigo-600/90 dark:text-indigo-400">
