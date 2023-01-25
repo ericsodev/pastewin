@@ -11,7 +11,7 @@ export function InviteToast(): JSX.Element {
   const { data: invites } = trpc.user.getInvites.useQuery(undefined, {
     enabled: status === "authenticated",
     retry: 0,
-    refetchInterval: 1000 * 60 * 10,
+    refetchInterval: 1000 * 60 * 15,
   });
   const { Toast, showToast, closeToast } = useToast({
     timeOpen: 100,
