@@ -1,7 +1,11 @@
 import z from "zod";
 import { router, publicProcedure, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
-import { isEditAuthorized, isViewAuthorized, getAuthority } from "./projectAuthUtil";
+import {
+  isEditAuthorized,
+  isViewAuthorized,
+  getAuthority,
+} from "./projectAuthUtil";
 
 export const documentRouter = router({
   getDocument: publicProcedure
@@ -98,7 +102,41 @@ export const documentRouter = router({
 
       if (!isViewAuthorized(project, ctx.session?.user?.id))
         throw new TRPCError({ code: "UNAUTHORIZED" });
-      return { ...document, role: getAuthority(project, ctx.session?.user?.id) };
+      return {
+        ...document,
+        role: getAuthority(project, ctx.session?.user?.id),
+      };
+    }),
+  deleteDocument: protectedProcedure
+    /**
+     * This endpoint deletes a documents content and/or name.
+     *
+     * Authorization Checks (the document must be a part of a project)
+     * - Editor
+     * - Owner
+     *
+     */
+    .input(z.object({ documentId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const document = await ctx.prisma.document.findUnique({
+        where: { id: input.documentId },
+        select: {
+          project: {
+            include: {
+              owner: true,
+              editors: true,
+            },
+          },
+        },
+      });
+      if (!document) throw new TRPCError({ code: "NOT_FOUND" });
+      if (!document.project) throw new TRPCError({ code: "BAD_REQUEST" });
+      if (!isEditAuthorized(document.project, ctx.session.user.id))
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+
+      await ctx.prisma.document.delete({
+        where: { id: input.documentId },
+      });
     }),
   document: protectedProcedure
     /**
@@ -148,7 +186,10 @@ export const documentRouter = router({
       if (!isEditAuthorized(document.project, ctx.session.user.id))
         throw new TRPCError({ code: "UNAUTHORIZED" });
       if (document.viewOnly)
-        throw new TRPCError({ code: "BAD_REQUEST", message: "The document is view only." });
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "The document is view only.",
+        });
       await ctx.prisma.document.update({
         where: {
           id: input.documentId,
@@ -205,7 +246,10 @@ export const documentRouter = router({
         },
       });
       if (!document) throw new TRPCError({ code: "NOT_FOUND" });
-      if (document.project && !isViewAuthorized(document.project, ctx.session.user.id))
+      if (
+        document.project &&
+        !isViewAuthorized(document.project, ctx.session.user.id)
+      )
         throw new TRPCError({ code: "UNAUTHORIZED" });
 
       return await ctx.prisma.project.create({
@@ -368,7 +412,9 @@ export const documentRouter = router({
      * Returns
      * - Slug of the created document
      */
-    .input(z.object({ name: z.string().min(1).max(35), content: z.string().min(1) }))
+    .input(
+      z.object({ name: z.string().min(1).max(35), content: z.string().min(1) })
+    )
     .mutation(async ({ ctx, input }) => {
       return await ctx.prisma.document.create({
         data: {
