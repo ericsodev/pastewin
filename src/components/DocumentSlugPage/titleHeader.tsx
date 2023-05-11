@@ -1,14 +1,23 @@
 import Link from "next/link";
 import { TitleInput } from "./titleInput";
-import { ClockIcon, Cog6ToothIcon, TrashIcon } from "@heroicons/react/20/solid";
+import {
+  ClockIcon,
+  Cog6ToothIcon,
+  FolderIcon,
+  TrashIcon,
+} from "@heroicons/react/20/solid";
 import { Menu } from "@headlessui/react";
 import { useDocument } from "../../contexts/documentContext";
 import DeleteDocumentModal from "./deleteDocumentModal";
 import { useState } from "react";
+import RevisionsModal from "./revisionsModal";
+import SaveRevisionsModal from "./saveRevisionModal";
 
 export function TitleHeader(): JSX.Element {
   const { document, refetch } = useDocument();
   const [deleteModalOpen, setDeleteModal] = useState(false);
+  const [revisionModalOpen, setRevisionModal] = useState(false);
+  const [saveModalOpen, setSaveModal] = useState(false);
 
   if (!document) {
     return <h1>Error</h1>;
@@ -21,6 +30,14 @@ export function TitleHeader(): JSX.Element {
         open={deleteModalOpen}
         setOpen={setDeleteModal}
       ></DeleteDocumentModal>
+      <RevisionsModal
+        open={revisionModalOpen}
+        setOpen={setRevisionModal}
+      ></RevisionsModal>
+      <SaveRevisionsModal
+        open={saveModalOpen}
+        setOpen={setSaveModal}
+      ></SaveRevisionsModal>
       <div>
         <div className="flex flex-row items-baseline gap-3">
           {project && ["OWNER", "EDITOR"].includes(document.role) ? (
@@ -56,17 +73,30 @@ export function TitleHeader(): JSX.Element {
             rounded-md bg-slate-50/60 px-1 py-0.5 text-sm text-slate-600 shadow-md backdrop-blur-2xl
              dark:divide-gray-700 dark:border-2 dark:border-gray-800 dark:bg-slate-800/30 dark:text-slate-300"
               >
+                {["OWNER", "EDITOR"].includes(document.role) && (
+                  <div className="px-0.5 py-1">
+                    <Menu.Item
+                      as="button"
+                      onClick={() => setSaveModal(true)}
+                      className="inline-flex w-full items-center justify-start gap-2.5 rounded-md p-2 hover:bg-slate-400/30 hover:bg-opacity-70 dark:hover:bg-slate-700"
+                    >
+                      <FolderIcon className="h-4 w-4"></FolderIcon>
+                      save as
+                    </Menu.Item>
+                  </div>
+                )}
                 <div className="px-0.5 py-1">
                   <Menu.Item
                     as="button"
+                    onClick={() => setRevisionModal(true)}
                     className="inline-flex w-full items-center justify-start gap-2.5 rounded-md p-2 hover:bg-slate-400/30 hover:bg-opacity-70 dark:hover:bg-slate-700"
                   >
                     <ClockIcon className="h-4 w-4"></ClockIcon>
                     revisions
                   </Menu.Item>
                 </div>
-                {/* Delete is for owner only */}
-                {document.role === "OWNER" && (
+                {/* Delete is for owner/editor only */}
+                {["EDITOR", "OWNER"].includes(document.role) && (
                   <div className="px-0.5 py-1">
                     <Menu.Item
                       as="button"
