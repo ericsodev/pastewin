@@ -6,6 +6,8 @@ import {
   isViewAuthorized,
   getAuthority,
 } from "./projectAuthUtil";
+import { NOTFOUND } from "dns";
+import { doc } from "prettier";
 
 export const documentRouter = router({
   getDocument: publicProcedure
@@ -200,7 +202,202 @@ export const documentRouter = router({
         },
       });
     }),
+  saveRevision: protectedProcedure
+    /**
+     * This endpoint creates a revision of a document
+     *
+     * Authorization Check
+     * - If this document is a part of a project
+     *  - The user has editor/owner role
+     * - Document content is different from previous revision
+     *
+     * Returns None
+     *
+     */
+    .input(z.object({ documentId: z.string(), revisionName: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const document = await ctx.prisma.document.findUnique({
+        where: { id: input.documentId },
+        select: {
+          content: true,
+          project: {
+            include: {
+              editors: true,
+              owner: true,
+            },
+          },
+          revisions: {
+            take: 1,
+            orderBy: {
+              createdAt: "desc",
+            },
+            select: {
+              content: true,
+            },
+          },
+        },
+      });
+      if (!document) throw new TRPCError({ code: "NOT_FOUND" });
+      // Check document is part of a project
+      if (!document.project) throw new TRPCError({ code: "BAD_REQUEST" });
+      // Check authority
+      if (!isEditAuthorized(document.project, ctx.session.user.id))
+        throw new TRPCError({ code: "BAD_REQUEST" });
+      // Check previous revision
+      if (
+        document.revisions.length > 0 &&
+        document.revisions[0]?.content === document.content
+      )
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Content is the same as the last revision.",
+        });
 
+      // Save new revision
+      await ctx.prisma.revision.create({
+        data: {
+          content: document.content,
+          name: input.revisionName,
+          document: {
+            connect: {
+              id: input.documentId,
+            },
+          },
+        },
+      });
+    }),
+  getRevision: protectedProcedure
+    /**
+     * This endpoint the contents of a revision
+     * sorted in latest to earliest
+     *
+     * Authorization Check
+     * - If this document is a part of a project
+     *  - The project is public or the user has viewer authority
+     *
+     * Returns
+     * Revision
+     */
+    .input(z.object({ slug: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const revision = await ctx.prisma.revision.findUnique({
+        where: { slug: input.slug },
+        select: {
+          content: true,
+          document: {
+            select: {
+              project: {
+                select: {
+                  public: true,
+                  editors: true,
+                  owner: true,
+                  viewers: true,
+                },
+              },
+            },
+          },
+        },
+      });
+      if (!revision) throw new TRPCError({ code: "NOT_FOUND" });
+
+      if (!revision.document.project)
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Document does not belong to a project.",
+        });
+
+      if (!isViewAuthorized(revision.document.project, ctx.session.user.id))
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      const rev = await ctx.prisma.revision.findUniqueOrThrow({
+        where: {
+          slug: input.slug,
+        },
+        select: {
+          content: true,
+          name: true,
+          createdAt: true,
+          document: {
+            select: {
+              slug: true,
+              name: true,
+              project: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+      });
+      return {
+        ...rev,
+        role: getAuthority(revision.document.project, ctx.session.user.id),
+      };
+    }),
+  revisions: protectedProcedure
+    /**
+     * This endpoint returns a list of revisions of a document
+     * sorted in latest to earliest
+     *
+     * Authorization Check
+     * - If this document is a part of a project
+     *  - The project is public or the user has viewer authority
+     *
+     * Returns
+     * - ID and Slug of the created project
+     */
+    .input(z.object({ documentId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const document = await ctx.prisma.document.findUnique({
+        where: { id: input.documentId },
+        select: {
+          content: true,
+          project: {
+            select: {
+              public: true,
+              editors: true,
+              owner: true,
+              viewers: true,
+            },
+          },
+          revisions: {
+            take: 1,
+            orderBy: {
+              createdAt: "desc",
+            },
+            select: {
+              content: true,
+            },
+          },
+        },
+      });
+      if (!document) throw new TRPCError({ code: "NOT_FOUND" });
+
+      if (!document.project)
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Document does not belong to a project.",
+        });
+
+      if (!isViewAuthorized(document.project, ctx.session.user.id))
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+
+      return await ctx.prisma.revision.findMany({
+        where: {
+          documentId: input.documentId,
+        },
+        take: 10,
+        orderBy: {
+          createdAt: "desc",
+        },
+        select: {
+          createdAt: true,
+          slug: true,
+          name: true,
+          id: true,
+        },
+      });
+    }),
   fork: protectedProcedure
     /**
      * This endpoint creates a new project containing this document

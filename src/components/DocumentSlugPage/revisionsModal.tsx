@@ -4,6 +4,8 @@ import { useDocument } from "../../contexts/documentContext";
 import { ClockIcon, XMarkIcon } from "@heroicons/react/20/solid";
 import { trpc } from "../../utils/trpc";
 import { useRouter } from "next/router";
+import { Loading } from "../loading";
+import dayjs from "dayjs";
 interface Props {
   open: boolean;
   setOpen: (isOpen: boolean) => void;
@@ -11,19 +13,18 @@ interface Props {
 export default function RevisionsModal({ open, setOpen }: Props): JSX.Element {
   const { document } = useDocument();
   const router = useRouter();
-  const { mutateAsync, isLoading, isError } =
-    trpc.document.deleteDocument.useMutation();
-
+  const {
+    data: revisions,
+    isLoading,
+    isError,
+  } = trpc.document.revisions.useQuery(
+    {
+      documentId: document?.id ?? "",
+    },
+    { enabled: document !== undefined }
+  );
+  const selected = false;
   if (!document) return <h1>error</h1>;
-
-  const deleteDocument = async () => {
-    await mutateAsync({ documentId: document.id });
-    if (!document.project) {
-      router.push("/");
-    } else {
-      router.push("/project/" + document.project.slug);
-    }
-  };
 
   return (
     <Transition appear show={open} as={Fragment}>
@@ -62,33 +63,48 @@ export default function RevisionsModal({ open, setOpen }: Props): JSX.Element {
                   </div>
                   <span className="ml-auto">
                     <XMarkIcon
-                      className="h-5 w-5 hover:scale-110 hover:text-black"
+                      className="h-5 w-5 hover:scale-110 hover:text-black dark:hover:text-white"
                       onClick={() => setOpen(false)}
                     ></XMarkIcon>
                   </span>
                 </Dialog.Title>
-                <div>
-                  <h2 className="">revisions list</h2>
+                <div className="mt-6 w-full">
+                  {isLoading && <Loading></Loading>}
+                  {!isLoading && !isError && revisions.length === 0 ? (
+                    <h3 className="mx-auto inline-block font-medium text-slate-600">
+                      no saved revisions
+                    </h3>
+                  ) : (
+                    <ul className="flex flex-col gap-2">
+                      {revisions?.map((x) => (
+                        <li
+                          key={x.id}
+                          tabIndex={0}
+                          onClick={() =>
+                            router.push("/document/revision/" + x.slug)
+                          }
+                          className="flex cursor-pointer items-center rounded-md bg-gray-200/50 py-1.5 px-4 font-medium text-gray-700 hover:bg-gray-200 focus:bg-gray-200/90 active:scale-[0.98] dark:text-gray-300"
+                        >
+                          <text>{x.name}</text>
+                          <text className="ml-auto text-sm text-gray-500 ">
+                            {dayjs(x.createdAt).format("MMM DD, YYYY")}
+                          </text>
+                        </li>
+                      )) ?? <></>}
+                    </ul>
+                  )}
                 </div>
-                <div className="mt-8 flex gap-5">
-                  <button
-                    className="dark:text-red-680 dark:hover:text-red-30 mx-auto inline-flex w-1/2 items-center justify-start gap-2.5
-                     rounded-md bg-blue-400/80 p-2 text-blue-800 hover:bg-blue-500/90 hover:bg-opacity-70
-                      hover:text-blue-900 dark:bg-blue-300/90 dark:hover:bg-blue-400"
-                    onClick={() => setOpen(false)}
-                  >
-                    <XMarkIcon className="h-4 w-4"></XMarkIcon>
-                    close
-                  </button>
-                  <button
-                    className="dark:text-red-680 dark:hover:text-red-30 mx-auto inline-flex w-1/2 items-center justify-start gap-2.5
+                <div className="mt-8">
+                  {selected && (
+                    <button
+                      className="dark:text-red-680 dark:hover:text-red-30 mx-auto inline-flex w-1/2 items-center justify-start gap-2.5
                      rounded-md bg-red-400/80 p-2 text-red-800 hover:bg-red-500/90 hover:bg-opacity-70
                       hover:text-red-900 dark:bg-red-300/90 dark:hover:bg-red-400"
-                    onClick={deleteDocument}
-                  >
-                    <ClockIcon className="h-4 w-4"></ClockIcon>
-                    confirm revert
-                  </button>
+                    >
+                      <ClockIcon className="h-4 w-4"></ClockIcon>
+                      confirm revert
+                    </button>
+                  )}
                 </div>
               </Dialog.Panel>
             </Transition.Child>
