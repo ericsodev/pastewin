@@ -6,6 +6,10 @@ generator client {
   previewFeatures = ["fullTextSearch"]
 }
 
+generator erd {
+  provider = "prisma-erd-generator"
+}
+
 datasource db {
   provider = "postgresql"
   // NOTE: When using postgresql, mysql or sqlserver, uncomment the @db.Text annotations in model Account below
@@ -74,11 +78,12 @@ model Document {
 
 model Revision {
   id         String   @id @unique @default(cuid())
-  document   Document @relation(fields: [documentId], references: [id])
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
   documentId String
   name       String
   content    String
   createdAt  DateTime @default(now())
+  slug       String   @unique @default(cuid())
 }
 
 model Project {

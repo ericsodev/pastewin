@@ -21,11 +21,14 @@ export default function Navbar(): JSX.Element {
   return (
     <div
       className={
-        "flex w-full items-center justify-center gap-5 bg-gradient-to-b from-slate-400/40 to-transparent px-5 pt-3.5 pb-8 backdrop-blur-xl dark:from-slate-900/70 dark:to-transparent"
+        "relative z-50 flex w-full items-center justify-center gap-5 bg-gradient-to-b from-slate-400/40 to-transparent px-5 pt-3.5 pb-8 backdrop-blur-xl dark:from-slate-900/70 dark:to-transparent"
       }
     >
       <InviteToast></InviteToast>
-      <RegisterModal open={isRegisterModalOpen} setOpen={setModalOpen}></RegisterModal>
+      <RegisterModal
+        open={isRegisterModalOpen}
+        setOpen={setModalOpen}
+      ></RegisterModal>
       <Link
         href="/"
         className={
