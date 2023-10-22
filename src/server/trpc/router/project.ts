@@ -65,7 +65,7 @@ export const projectRouter = router({
           public: true,
           name: true,
           documents: {
-            take: 6,
+            take: 25,
             orderBy: {
               name: "asc",
             },
@@ -135,7 +135,12 @@ export const projectRouter = router({
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }),
   create: protectedProcedure
-    .input(z.object({ name: z.string().min(1).max(35), public: z.boolean().default(true) }))
+    .input(
+      z.object({
+        name: z.string().min(1).max(35),
+        public: z.boolean().default(true),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       return await ctx.prisma.project.create({
         data: {
@@ -170,7 +175,12 @@ export const projectRouter = router({
      * Returns
      * - New Document ID and Slug
      */
-    .input(z.object({ projectId: z.string(), documentName: z.string().min(1).max(35) }))
+    .input(
+      z.object({
+        projectId: z.string(),
+        documentName: z.string().min(1).max(35),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       const project = await ctx.prisma.project.findUnique({
         where: {
@@ -185,7 +195,8 @@ export const projectRouter = router({
         },
       });
       if (!project) throw new TRPCError({ code: "NOT_FOUND" });
-      if (project.owner.id !== ctx.session.user.id) throw new TRPCError({ code: "UNAUTHORIZED" });
+      if (project.owner.id !== ctx.session.user.id)
+        throw new TRPCError({ code: "UNAUTHORIZED" });
 
       return await ctx.prisma.document.create({
         data: {
@@ -250,7 +261,9 @@ export const projectRouter = router({
       return project.pinnedDocument;
     }),
   renameProject: protectedProcedure
-    .input(z.object({ projectId: z.string(), newName: z.string().min(1).max(35) }))
+    .input(
+      z.object({ projectId: z.string(), newName: z.string().min(1).max(35) })
+    )
     .mutation(async ({ ctx, input }) => {
       const project = await ctx.prisma.project.findUnique({
         where: {
@@ -263,7 +276,8 @@ export const projectRouter = router({
         },
       });
       if (!project) throw new TRPCError({ code: "NOT_FOUND" });
-      if (ctx.session.user.id !== project.owner.id) throw new TRPCError({ code: "UNAUTHORIZED" });
+      if (ctx.session.user.id !== project.owner.id)
+        throw new TRPCError({ code: "UNAUTHORIZED" });
 
       await ctx.prisma.project.update({
         where: {
@@ -275,7 +289,9 @@ export const projectRouter = router({
       });
     }),
   editable: protectedProcedure
-    .input(z.object({ projectId: z.string(), isEditable: z.boolean().default(true) }))
+    .input(
+      z.object({ projectId: z.string(), isEditable: z.boolean().default(true) })
+    )
     .mutation(async ({ ctx, input }) => {
       const project = await ctx.prisma.project.findUnique({
         where: {
@@ -288,7 +304,8 @@ export const projectRouter = router({
         },
       });
       if (!project) throw new TRPCError({ code: "NOT_FOUND" });
-      if (ctx.session.user.id !== project.owner.id) throw new TRPCError({ code: "UNAUTHORIZED" });
+      if (ctx.session.user.id !== project.owner.id)
+        throw new TRPCError({ code: "UNAUTHORIZED" });
 
       await ctx.prisma.project.update({
         where: {
@@ -300,7 +317,9 @@ export const projectRouter = router({
       });
     }),
   visibility: protectedProcedure
-    .input(z.object({ projectId: z.string(), isPublic: z.boolean().default(false) }))
+    .input(
+      z.object({ projectId: z.string(), isPublic: z.boolean().default(false) })
+    )
     .mutation(async ({ ctx, input }) => {
       const project = await ctx.prisma.project.findUnique({
         where: {
@@ -313,7 +332,8 @@ export const projectRouter = router({
         },
       });
       if (!project) throw new TRPCError({ code: "NOT_FOUND" });
-      if (ctx.session.user.id !== project.owner.id) throw new TRPCError({ code: "UNAUTHORIZED" });
+      if (ctx.session.user.id !== project.owner.id)
+        throw new TRPCError({ code: "UNAUTHORIZED" });
 
       await ctx.prisma.project.update({
         where: {
@@ -365,10 +385,15 @@ export const projectRouter = router({
         },
       });
       if (!project) throw new TRPCError({ code: "NOT_FOUND" });
-      if (project.owner.id !== ctx.session.user.id) throw new TRPCError({ code: "UNAUTHORIZED" });
+      if (project.owner.id !== ctx.session.user.id)
+        throw new TRPCError({ code: "UNAUTHORIZED" });
 
-      const projectViewers = new Set(project.viewers.map((x) => x.displayName as string));
-      const projectEditors = new Set(project.editors.map((x) => x.displayName as string));
+      const projectViewers = new Set(
+        project.viewers.map((x) => x.displayName as string)
+      );
+      const projectEditors = new Set(
+        project.editors.map((x) => x.displayName as string)
+      );
 
       type Members = {
         displayName: string;
@@ -389,7 +414,10 @@ export const projectRouter = router({
             existingViewerPromotions.push({ displayName: x.displayName });
           else newEditors.push(x.displayName);
         } else {
-          if (projectViewers.has(x.displayName) || projectEditors.has(x.displayName))
+          if (
+            projectViewers.has(x.displayName) ||
+            projectEditors.has(x.displayName)
+          )
             existingMemberRemoval.push({ displayName: x.displayName });
         }
       });
@@ -510,7 +538,8 @@ export const projectRouter = router({
       });
 
       if (!project) throw new TRPCError({ code: "NOT_FOUND" });
-      if (project.owner.id !== ctx.session.user.id) throw new TRPCError({ code: "UNAUTHORIZED" });
+      if (project.owner.id !== ctx.session.user.id)
+        throw new TRPCError({ code: "UNAUTHORIZED" });
 
       await ctx.prisma.invitation.deleteMany({
         where: {
@@ -547,7 +576,8 @@ export const projectRouter = router({
       });
 
       if (!project) throw new TRPCError({ code: "NOT_FOUND" });
-      if (project.owner.id !== ctx.session.user.id) throw new TRPCError({ code: "UNAUTHORIZED" });
+      if (project.owner.id !== ctx.session.user.id)
+        throw new TRPCError({ code: "UNAUTHORIZED" });
 
       return project.invitations;
     }),
